@@ -63,13 +63,13 @@ void setup() {  // Setup runs once per reset
 void loop() {
   for (int i = 0; i < 3; i ++) {
     randomizeDriver(drivers[i]);
-  }  
-  delay(random(minDelay, maxDelay));  
+  }
+  delay(random(minDelay, maxDelay));
 }
 
-void autoTest(){
+void autoTest() {
 
-for (int i = 0; i < 3; i ++) {
+  for (int i = 0; i < 3; i ++) {
     Serial.print("test driver: ");
     Serial.print(i);
     Serial.println('A');
@@ -90,16 +90,29 @@ void testDriver(L298 * driver, char motor) {
   delay(1E3);
 }
 
-void randomizeDriver(L298 * driver) {  
-  if(random(1000) < 500) {
+void randomizeDriver(L298 * driver) {
+
+  if (random(1000) < 500) {
     driver->setSpeed('A', random(-maxSpeed, maxSpeed)) ;
-  }else{
-    driver->brake('A');
-  }
-  
-  if(random(1000) < 500) {
+  } else {
+    //    driver->brake('A');
     driver->setSpeed('B', random(-maxSpeed, maxSpeed)) ;
-  }else{
+  }
+
+  if(random(1000) < 10){
     driver->brake('B');
   }
+
+  if(random(1000) < 10){
+    driver->brake('A');
+  }
+
+  
+
+
+  //  if(random(1000) < 500) {
+  //    driver->setSpeed('B', random(-maxSpeed, maxSpeed)) ;
+  //  }else{
+  //    driver->brake('B');
+  //  }
 }
