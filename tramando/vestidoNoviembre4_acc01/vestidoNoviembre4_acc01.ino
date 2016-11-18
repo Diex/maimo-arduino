@@ -61,6 +61,8 @@ void setup() {
   runTest();
 }
 
+float prevY = 0;
+
 void loop() {
 
   /* Get a new sensor event */
@@ -70,7 +72,14 @@ void loop() {
   Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
   Serial.println("m/s^2 ");
   
-  delay(25);
+  float delta = prevY - event.acceleration.y;
+  prevY = event.acceleration.y;
+  Serial.print("delta: ");  Serial.println(delta);
+  delay(20);
+  
+  if(delta > 2.0){
+    playAnimation(15);
+  }
   
   
 }
@@ -107,6 +116,33 @@ void displaySensorDetails(void)
   Serial.println("------------------------------------");
   Serial.println("");
   delay(500);
+}
+
+
+void playAnimation(int clock){
+
+  int val = 255;
+  int decay = 7;
+
+  
+  for (int i = TOP_NUM_LEDS ; i >= -1; i --) {
+    top.clear();
+    for (int a = 0; a < decay; a++) {
+      top.setPixelColor(i - a, val / a, val / a, val / a);
+    }
+    top.show();
+     delay(clock);
+   }
+
+  for (int i = 0 ; i < BOT_NUM_LEDS; i ++) {
+    bottom.clear();
+    for (int a = 0; a < decay; a++) {
+      bottom.setPixelColor(i + a, val / a, val / a, val / a);
+    }
+    bottom.show();
+    delay(clock);
+  }
+
 }
 
 void runTest(){
