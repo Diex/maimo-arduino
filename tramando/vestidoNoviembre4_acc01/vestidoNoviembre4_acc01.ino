@@ -42,6 +42,9 @@ Adafruit_NeoPixel bottom = Adafruit_NeoPixel(BOT_NUM_LEDS, BOT_PIN, NEO_GRB + NE
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
 
+int sensorMode = 0;
+int dressModePin = 3;
+
 void setup() {
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
 #if defined (__AVR_ATtiny85__)
@@ -59,6 +62,9 @@ void setup() {
   runTest();
   runTest();
   runTest();
+
+  pinMode(dressModePin, INPUT_PULLUP);
+  
 }
 
 float prevY = 0;
@@ -76,10 +82,18 @@ void loop() {
   prevY = event.acceleration.y;
   Serial.print("delta: ");  Serial.println(delta);
   delay(20);
+  sensorMode = digitalRead(dressModePin);
   
-  if(delta > 2.0){
-    playAnimation(15);
-  }
+    if(sensorMode){
+      if(delta > 2.0){
+        playAnimation(15);
+      }    
+    }else{
+      playAnimation(random(20, 75));
+      delay(random(150, 1000));
+    }
+  
+  
   
   
 }
