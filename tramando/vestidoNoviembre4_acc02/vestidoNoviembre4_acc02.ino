@@ -42,6 +42,9 @@ Adafruit_NeoPixel bottom = Adafruit_NeoPixel(BOT_NUM_LEDS, BOT_PIN, NEO_GRB + NE
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
 
+int idleMode = 0;
+int dressModePin = 3;
+
 void setup() {
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
 #if defined (__AVR_ATtiny85__)
@@ -59,78 +62,83 @@ void setup() {
   runTest();
   runTest();
   runTest();
+
+  pinMode(dressModePin, INPUT_PULLUP);
 }
 
 float prevY = 0;
-
+float delta = 0;
 void loop() {
 
+  idleMode = digitalRead(dressModePin);
+
+  if (idleMode == LOW) { // inputPullup ?? ENGANIA PICHANGA CAMBIAR
+    readSensor();
+    fadeOut();
+    render();
+    if (delta > 1.0) {
+      animate();
+    }
+  } else {
+    playAnimation(random(20, 75));
+    delay(random(150, 1000));
+  }
+
+
+  delay(20);
+
+}
+
+void readSensor() {
   /* Get a new sensor event */
   sensors_event_t event;
   accel.getEvent(&event);
-
   Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
   Serial.println("m/s^2 ");
-
-  float delta = prevY - event.acceleration.y;
+  delta = prevY - event.acceleration.y;
   prevY = event.acceleration.y;
   Serial.print("delta: ");  Serial.println(delta);
-  delay(20);
-
-  if (delta > 2.0) {
-    playAnimation(15);
-  }
-
-
 }
-
-void initSensor() {
-#ifndef ESP8266
-  while (!Serial);     // will pause Zero, Leonardo, etc until serial console opens
-#endif
-  Serial.begin(9600);
-  Serial.println("Accelerometer Test"); Serial.println("");
-
-  /* Initialise the sensor */
-  if (!accel.begin())
-  {
-    /* There was a problem detecting the ADXL345 ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while (1);
-  }
-
-  /* Display some basic information on this sensor */
-  displaySensorDetails();
-}
-void displaySensorDetails(void)
-{
-  sensor_t sensor;
-  accel.getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" m/s^2");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" m/s^2");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" m/s^2");
-  Serial.println("------------------------------------");
-  Serial.println("");
-  delay(500);
-}
-
 
 
 int topValues[TOP_NUM_LEDS];
 int bottomValues[BOT_NUM_LEDS];
-
+int decay  = 10;
 void fadeOut() {
   for (int i = TOP_NUM_LEDS ; i >= -1; i --) {
-    topValues[i] = constrain(topvalues[i] - 1, 0, 255);
+    topValues[i] = constrain(topValues[i] - decay, 0, 255);
   }
   for (int i = 0 ; i < BOT_NUM_LEDS; i ++) {
-    bottomValues[i] = constrain(bottomValues[i] - 1, 0, 255);
+    bottomValues[i] = constrain(bottomValues[i] - decay, 0, 255);
   }
 }
+
+void render() {
+  for (int i = TOP_NUM_LEDS ; i >= -1; i --) {
+    top.setPixelColor(i, topValues[i], topValues[i], topValues[i]);
+  }
+  top.show();
+
+  for (int i = 0 ; i < BOT_NUM_LEDS; i ++) {
+    bottom.setPixelColor(i, bottomValues[i], bottomValues[i], bottomValues[i]);
+  }
+  bottom.show();
+}
+
+int maxLeds = TOP_NUM_LEDS + BOT_NUM_LEDS;
+int currentLed = 0;
+
+void animate() {
+  if (currentLed < TOP_NUM_LEDS) {
+    topValues[TOP_NUM_LEDS - currentLed] = 255;
+  } else {
+    bottomValues[currentLed - TOP_NUM_LEDS] = 255;
+  }
+
+  currentLed = (currentLed + 1) % maxLeds;
+}
+
+
 
 
 void playAnimation(int clock) {
@@ -158,6 +166,46 @@ void playAnimation(int clock) {
   }
 
 }
+
+void initSensor() {
+#ifndef ESP8266
+  while (!Serial);     // will pause Zero, Leonardo, etc until serial console opens
+#endif
+  Serial.begin(9600);
+  Serial.println("Accelerometer Test"); Serial.println("");
+
+  /* Initialise the sensor */
+  if (!accel.begin())
+  {
+    /* There was a problem detecting the ADXL345 ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+    while (1);
+  }
+
+  /* Display some basic information on this sensor */
+  displaySensorDetails();
+}
+
+
+void displaySensorDetails(void)
+{
+  sensor_t sensor;
+  accel.getSensor(&sensor);
+  Serial.println("------------------------------------");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" m/s^2");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" m/s^2");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" m/s^2");
+  Serial.println("------------------------------------");
+  Serial.println("");
+  delay(500);
+}
+
+
+
+
 
 void runTest() {
   int val = 255;
