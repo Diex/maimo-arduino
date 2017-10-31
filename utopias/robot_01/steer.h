@@ -45,12 +45,18 @@ void joy(){
   yv = constrain(map(analogRead(yjoy) , 0, maxy, 1000, -1000), -1000, 1000);
 }
 
+void drive(int fb, int lr){
+	xv = lr;
+	yv = -fb;
 
-void update(){
   lwheel = (-yv + xv);    
   rwheel = (-yv - xv);
 }
 
+void motors(int m1, int m2){
+	lwheel = m1; // (-yv + xv);    
+    rwheel = m2;// (-yv - xv);	
+}
 
 void run(){
 
