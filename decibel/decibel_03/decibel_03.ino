@@ -19,7 +19,7 @@ long coolerOnTime = 30E3;
 boolean coolerStatus = false;
 
 float level = 0;
-float levelUp = 4;
+float levelUp = 3;
 float maxLevel = 600;
 
 
@@ -30,7 +30,8 @@ const int SHOW = 2;
 int state = PLAYING;
 
 void interrupt() {
-  level += levelUp;
+//  level += levelUp;
+  level = ease(level+levelUp, level, 0.1);  
 }
 
 void setup() {
