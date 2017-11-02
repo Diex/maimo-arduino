@@ -8,16 +8,23 @@ const int CNY_R2 = A5;
 const int CNY_L2 = A6;
 const int CNY_L1 = A7;
 
-int sensors[] = {CNY_R1, CNY_R2, CNY_L2, CNY_L1};
+int sensors[] = {CNY_L1, CNY_L2, CNY_R2, CNY_R1};
 int blackValue[sizeof(sensors)/sizeof(int)];
 int sensorsValue[sizeof(sensors)/sizeof(int)];
 byte status = 0;
 int treshold = 32;
 
+// const unsigned long factor = 8;
+float factor = 0.8;
+int ease(float current, float prev, float factor)
+{
+	return (unsigned int) (prev * factor) + (current * (1 - factor));
+}
+
 void calibrateSensors(){
 	delay(100);
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
-		blackValue[i] = analogRead(sensors[i]);
+		blackValue[i] = analogRead(sensors[i]);		
 		delay(10);
 	}
 }
@@ -28,28 +35,31 @@ void lineFollowerSetup()
 	calibrateSensors();
 }
 
+
+
 void readSensors()
 {
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
-		sensorsValue[i] = analogRead(sensors[i]);		
-		// Serial.print(sensorsValue[i]);
-		// Serial.print(':');
-		delay(10);
+		sensorsValue[i] = ease(analogRead(sensors[i]), sensorsValue[i], factor);		
+		// sensorsValue[i] = analogRead(sensors[i]);
+		Serial.print(sensorsValue[i]);
+		Serial.print("\t");
 	}	
-	// Serial.println();
 
+	Serial.println();
 }
 
 void updateSensors(){
 	status = 0;
-	Serial.print('R');
+	// Serial.print('R');
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++){
 		byte value = sensorsValue[i] > (blackValue[i] * 2) ? 1 : 0; // 0 estoy en la linea, 1 me sali		
 		status |= value << i;
-		Serial.print(value & B00000001);
+		// Serial.print(value & B00000001);
 	}	
-	Serial.print('L');
-	Serial.println();
+	// Serial.print('L');
+	// Serial.println();
+	lcdPrintStatus(status);
 	
 }
 
