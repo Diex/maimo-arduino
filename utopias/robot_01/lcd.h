@@ -19,8 +19,16 @@ void lcdSetup() {
   lcd.begin(16, 2);
 }
 
+void lcdPrintInstruction(byte instruction){
+  lcd.setCursor(1, 0);  
+  if(instruction == 0) lcd.print("STOP");  
+  if(instruction == 1) lcd.print("GO");  
+  if(instruction == 2) lcd.print("TURN LEFT");  
+  if(instruction == 4) lcd.print("TURN RIGHT");  
+}
+
 void lcdPrintStatus(byte status) {  
-  lcd.clear();
+
   lcd.setCursor(0, 0);  
   
   if(status == B00000000) lcd.print("----");  

@@ -12,6 +12,11 @@ int m3 = 0;
 int m4 = 0;
 int rwheel = 0;
 int lwheel = 0;
+
+int slow = 250;
+int med = 400;
+int full = 1000;
+
 void steerSetup()
 {
 	// Set pins as outputs

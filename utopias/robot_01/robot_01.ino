@@ -1,6 +1,9 @@
 #include "steer.h"
 #include "lcd.h"
 #include "lineFollower.h"
+#include "communications.h"
+
+#include "CmdMessenger.h"  // CmdMessenger
 // This will run only one time.
 void setup()
 {
@@ -8,18 +11,48 @@ void setup()
   lineFollowerSetup();
   steerSetup();
   lcdSetup();
+  commSetup();
   // testSequence();
 }
 
-int slow = 250;
-int med = 400;
-int full = 1000;
 void loop()
 {
   delay(1); // gano tiempo...
   // ------------------------------------
+  commDataReceive();
   readSensors();
   updateSensors();
+    
+  if(status == B00001111)// encontró un blanco, hasta que no encuentra una linea completa no para)
+    pathFinding();
+
+  // robotWalk();
+  if(incomingMessage == GO) drive(med, 0);  
+  if(incomingMessage == STOP) drive(0, 0);
+  
+  run();
+
+  lcd.clear();
+  lcdPrintInstruction(incomingMessage);
+  lcdPrintStatus(status);
+
+
+  
+}
+
+void pathFinding(){
+
+      int turn;
+      turn = random(1000) < 500 ? 1 : -1;
+      while(status != B00000000)      {
+        rotate(turn, med);
+        run();
+        readSensors();
+        updateSensors();
+      }
+}
+
+void robotWalk(){
   switch (status)
   {
     // AVANZA
@@ -66,23 +99,12 @@ void loop()
       motors(med, -med);
       run();
       break;
-      
-      case B00001111:// encontró un blanco, hasta que no encuentra una linea completa no para
-      int turn;
-      turn = random(1000) < 500 ? 1 : -1;
-      while(status != B00000000)      {
-        rotate(turn, med);
-        run();
-        readSensors();
-        updateSensors();
-      }
+    
       default:// 
       motors(0, 0);
       run();
       break;
   }
-  
-  run();
 }
 
 

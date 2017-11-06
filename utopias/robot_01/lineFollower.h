@@ -52,7 +52,7 @@ void updateSensors(){
 	}	
 	// Serial.print('L');
 	// Serial.println();
-	lcdPrintStatus(status);
+	
 	
 }
 
