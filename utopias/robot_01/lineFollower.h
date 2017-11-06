@@ -1,12 +1,6 @@
 #include "Arduino.h"
+#include "pinDefinition.h"
 
-
-// los sensores estan definidos viendo al robot desde arriba
-// L1 L2 -- -- R2 R1
-const int CNY_R1 = A4;
-const int CNY_R2 = A5;
-const int CNY_L2 = A6;
-const int CNY_L1 = A7;
 
 int sensors[] = {CNY_L1, CNY_L2, CNY_R2, CNY_R1};
 int blackValue[sizeof(sensors)/sizeof(int)];
@@ -15,7 +9,7 @@ byte status = 0;
 int treshold = 32;
 
 // const unsigned long factor = 8;
-float factor = 0.8;
+float factor = 0.9;
 int ease(float current, float prev, float factor)
 {
 	return (unsigned int) (prev * factor) + (current * (1 - factor));
@@ -41,7 +35,6 @@ void readSensors()
 {
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
 		sensorsValue[i] = ease(analogRead(sensors[i]), sensorsValue[i], factor);		
-		// sensorsValue[i] = analogRead(sensors[i]);
 		Serial.print(sensorsValue[i]);
 		Serial.print("\t");
 	}	

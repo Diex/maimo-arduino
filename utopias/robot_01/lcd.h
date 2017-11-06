@@ -3,10 +3,19 @@
 #include <Arduino.h>
 
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(11, 12, 14, 15, 16, 17);
+//LiquidCrystal(rs, rw, d4, d5, d6, d7) 
+
+LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
+
 
 void lcdSetup() {
   // set up the LCD's number of columns and rows:
+  pinMode(LCD_RS, OUTPUT);
+  pinMode(LCD_EN, OUTPUT);
+  pinMode(LCD_D4, OUTPUT);
+  pinMode(LCD_D5, OUTPUT);
+  pinMode(LCD_D6, OUTPUT);
+  pinMode(LCD_D7, OUTPUT);
   lcd.begin(16, 2);
 }
 

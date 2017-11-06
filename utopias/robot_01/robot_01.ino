@@ -8,12 +8,12 @@ void setup()
   lineFollowerSetup();
   steerSetup();
   lcdSetup();
+  // testSequence();
 }
 
 int slow = 250;
 int med = 400;
 int full = 1000;
-
 void loop()
 {
   delay(1); // gano tiempo...
@@ -27,27 +27,19 @@ void loop()
       drive(med, 0);
       run();
       break;
-    case B00001101:
+      case B00001101:
       drive(med, 0);
       run();
       break;
-    case B00001011:
+      case B00001011:
       drive(med, 0);
       run();
       break;
-    
-    case B00000000:
+      case B00000000:
       drive(med, 0);
       run();
       break;
-    // case B00000001:
-    //   drive(500, 0);
-    //   run();
-    //   break;
-    // case B00001000:
-    //   drive(500, 0);
-    //   run();
-    //   break;
+      
       // COMPENSACION A LA IZQUIERDA
       case B00001000:// me estoy saliendo a la derecha.
       motors(-med, med);
@@ -57,16 +49,10 @@ void loop()
       motors(-med, med);
       run();
       break;
-      // case B00001101:// me estoy saliendo a la derecha.
-      // motors(-500, 500);
-      // run();
-      // break;
       case B00001110:// me estoy saliendo a la derecha mucho.
       motors(-med, med);
       run();
       break;
-
-
       // COMPENSACION A LA DERECHA
       case B00000001:// me estoy saliendo a la izquierda.
       motors(med, -med);
@@ -80,17 +66,23 @@ void loop()
       motors(med, -med);
       run();
       break;
-      // case B00000111:// me estoy saliendo a la izquierda.
-      // motors(500, -500);
-      // run();
-      // break;
-      default:// me estoy saliendo a la izquierda.
+      
+      case B00001111:// encontró un blanco, hasta que no encuentra una linea completa no para
+      int turn;
+      turn = random(1000) < 500 ? 1 : -1;
+      while(status != B00000000)      {
+        rotate(turn, med);
+        run();
+        readSensors();
+        updateSensors();
+      }
+      default:// 
       motors(0, 0);
       run();
       break;
   }
-  // motors(500, 1000);   // <--- gira a la izquierda por que M1 < M2
+  
   run();
-  // ------------------------------------
-  // joy();
 }
+
+

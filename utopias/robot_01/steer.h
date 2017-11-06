@@ -1,12 +1,5 @@
 #include "Arduino.h"
-// Motor A
-const int motorPin1 = 9; // Pin 14 of L293
-const int motorPin2 = 10; // Pin 10 of L293
-// Motor B
-const int motorPin3 = 5; // Pin  7 of L293
-const int motorPin4 = 6; // Pin  2 of L293
-const int xjoy = A1;
-const int yjoy = A0;
+#include "pinDefinition.h"
 int xv = 0;
 int yv = 0;
 int medx = 0;
@@ -36,7 +29,6 @@ void steerSetup()
 	maxy = medy * 2;
 }
 
-
 void motors(int m1, int m2)
 {
 	lwheel = m1; // (-yv + xv);
@@ -59,7 +51,9 @@ void drive(int fb, int lr)
 	motors(-yv + xv, -yv - xv); // diferencial
 }
 
-
+void rotate(int turn, int speed){
+  motors(turn * speed, turn * -speed);
+}
 
 void run()
 {
@@ -79,6 +73,24 @@ void run()
 	analogWrite(motorPin2, m2);
 	analogWrite(motorPin3, m3);
 	analogWrite(motorPin4, m4);
+}
+
+void testSequence2()
+{
+	drive(1000, 0);
+	run();
+	delay(2000);
+	drive(-1000, 0);
+	run();
+	delay(2000);
+	drive(-500, 500);
+	run();
+	delay(2000);
+	drive(-500, -500);
+	run();
+	delay(2000);
+	drive(0, 0);
+	run();
 }
 
 void testSequence()
