@@ -2,6 +2,7 @@
 #include "lcd.h"
 #include "lineFollower.h"
 #include "CmdMessenger.h" // CmdMessenger
+#include "download.h"
 
 const int dataPin = 2; // the number of the pushbutton pin
 
@@ -19,16 +20,14 @@ void setup()
   lineFollowerSetup();
   steerSetup();
   lcdSetup();
-  // commSetup();
-  // testSequence();
+  downloadSetup();
+
   pinMode(dataPin, INPUT);
   attachInterrupt(0, interr, FALLING);
 }
 
 unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
 unsigned long debounceDelay = 50; // the debounce time; increase if the output flickers
-
-
 
 void loop()
 {
@@ -41,15 +40,18 @@ void loop()
   delay(1); // gano tiempo...
   // ------------------------------------
   // Process incoming serial data, and perform callbacks
-  // cmdMessenger.feedinSerialData();
+  
   readSensors();
   updateSensors();
-  if (status == B00001111)
-  // encontró un blanco, hasta que no encuentra una linea completa no para)
+
+  if (status == B00001111) // encontró un blanco, hasta que no encuentra una linea completa no para)
   pathFinding();
+  
+
+  
   robotWalk();
   run();
-  // lcdPrintStatus(status);
+  
 }
 
 void pathFinding()
@@ -120,25 +122,4 @@ void robotWalk()
 }
 
 
-unsigned long previousOn = 0;        // will store last time LED was updated
-unsigned long onInterval = 1000;
-unsigned long previousOff = 0;
-unsigned long offInterval = 1000;
 
-void playTones() {
-
-  unsigned long currentMillis = millis();
-  
-  if(currentMillis - previousOn >= onInterval){
-    onInterval = random(100);
-    previousOn = currentMillis; 
-    tone(BUZZER, random(1000, 4000));   
-  }
-  
-  if(currentMillis - previousOff >= offInterval){
-    offInterval = 20 + random(1500);
-    previousOff = currentMillis;
-    tone(BUZZER, random(1000, 4000));   
-  }
-  // put your main code here, to run repeatedly:
-}
