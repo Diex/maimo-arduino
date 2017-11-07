@@ -55,7 +55,7 @@ void loop()
   // Process incoming serial data, and perform callbacks
 //  cmdMessenger.feedinSerialData();
     digitalWrite(13, HIGH); // sendGo();
-    delay(2000);
+    delay(20);
     digitalWrite(13, LOW); // sendGo();
     delay(2000);
     

@@ -11,6 +11,7 @@ const int motorPin2 = 10; // Pin 10 of L293
 const int motorPin3 = 6; // Pin  7 of L293
 const int motorPin4 = 5; // Pin  2 of L293
 
+const int BUZZER = 12;
 
 const int LCD_D4 = 22; // Violeta
 const int LCD_D5 = 24; // Gris
