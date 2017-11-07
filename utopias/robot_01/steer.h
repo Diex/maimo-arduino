@@ -60,6 +60,10 @@ void rotate(int turn, int speed){
   motors(turn * speed, turn * -speed);
 }
 
+void stop(){
+	drive(0,0);
+}
+
 void run()
 {
 	m1 = map(lwheel, -1000, 1000, 0, 255);

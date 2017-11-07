@@ -5,18 +5,11 @@
 #endif
 
 
-int frameRate = 20;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
 
-#define GO            1
-#define DOWNLOADING   2
-#define WAITING       4
 
-int action = GO;
 
-unsigned long nextUpdate = 3E3;
-unsigned long timeout = 3E3;
-unsigned long pFrameTime = 0;        //
+
 
 
 void downloadSetup() {
@@ -27,10 +20,6 @@ void downloadSetup() {
   pixels.begin(); // This initializes the NeoPixel library.
   // Serial.begin(115200);
 }
-
-
-
-
 
 
 // funciones de los leds
@@ -157,38 +146,4 @@ void playSound() {
 
 
 
-void updateDownload() {
 
-  unsigned long currentTime = millis();  
-  
-  if ((currentTime - pFrameTime) >= frameRate) {
-    pFrameTime = currentTime;
-    switch (action) {
-      case GO:
-        {
-          if (currentTime >= nextUpdate) {
-             nextUpdate = currentTime + timeout; // set up the next timeout period
-             action = action == GO ? DOWNLOADING : GO;
-          }
-          
-          playKit();
-          silence();
-          break;
-        }
-
-        case DOWNLOADING:
-        {
-          playSound();
-          playDownloading(currentTime);
-
-          break;
-        }
-
-        case WAITING:
-        {
-
-          break;
-        }
-    }
-  }
-}

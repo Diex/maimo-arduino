@@ -2,11 +2,27 @@
 #include "lcd.h"
 #include "lineFollower.h"
 #include "CmdMessenger.h" // CmdMessenger
-#include "download.h"
+
+#define GO            1
+#define DOWNLOADING   2
+#define WAITING       4
+int action = GO;
+
+
+unsigned long nextUpdate = 10E3;
+unsigned long timeout = 10E3;
+unsigned long pFrameTime = 0;        //
+
+int frameRate = 20;
+
+
+#include "download.h" // este archivo usa las variables anterios de tiempo... ^^^
 
 const int dataPin = 2; // the number of the pushbutton pin
 
 volatile int transmit = 0;
+
+
 
 void interr(){
   transmit = !transmit; // digitalRead(2);
@@ -26,31 +42,72 @@ void setup()
   attachInterrupt(0, interr, FALLING);
 }
 
-unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
-unsigned long debounceDelay = 50; // the debounce time; increase if the output flickers
+// unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
+// unsigned long debounceDelay = 50; // the debounce time; increase if the output flickers
+
+
+
 
 void loop()
 {
-  if(transmit) {
-    lcdPrintCommand("ROBOT: GO");
-  }else{
-    lcdPrintCommand("ROBOT: STOP");
-  }
+  // if(transmit) {
+  //   lcdPrintCommand("ROBOT: GO");
+  // }else{
+  //   lcdPrintCommand("ROBOT: STOP");
+  // }
 
   delay(1); // gano tiempo...
   // ------------------------------------
   // Process incoming serial data, and perform callbacks
-  
+  unsigned long currentTime = millis();  
+
   readSensors();
   updateSensors();
 
   if (status == B00001111) // encontró un blanco, hasta que no encuentra una linea completa no para)
   pathFinding();
   
-
   
-  robotWalk();
-  run();
+  if ((currentTime - pFrameTime) >= frameRate) {
+    pFrameTime = currentTime;
+    switch (action) {
+      case GO:
+        {
+          lcdPrintCommand("ROBOT: GO");
+          if (currentTime >= nextUpdate) {
+             nextUpdate = currentTime + random(timeout)  ; // set up the next timeout period
+             action = action == GO ? DOWNLOADING : GO;
+
+            stop();
+            run();
+          }
+          
+          playKit();
+          silence();
+          robotWalk();
+          run();
+          break;
+        }
+
+        case DOWNLOADING:
+        {
+          lcdPrintCommand("ROBOT: DOWNLOADING");
+          playSound();
+          playDownloading(currentTime);
+          
+          break;
+        }
+
+        case WAITING:
+        {
+          lcdPrintCommand("ROBOT: WAITING");
+          delay(3E3 + random(10E3));
+          nextUpdate = currentTime + random(timeout)  ; // set up the next timeout period
+          action = GO;
+          break;
+        }
+    }
+  }
   
 }
 
