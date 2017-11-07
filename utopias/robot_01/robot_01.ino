@@ -11,15 +11,18 @@ void setup()
   lineFollowerSetup();
   steerSetup();
   lcdSetup();
-  commSetup();
+  // commSetup();
   // testSequence();
+  pinMode(2, INPUT);
 }
 
 void loop()
 {
   delay(1); // gano tiempo...
   // ------------------------------------
-  commDataReceive();
+  // Process incoming serial data, and perform callbacks
+  // cmdMessenger.feedinSerialData();
+
   readSensors();
   updateSensors();
     
@@ -27,14 +30,19 @@ void loop()
     pathFinding();
 
   // robotWalk();
-  if(incomingMessage == GO) drive(med, 0);  
-  if(incomingMessage == STOP) drive(0, 0);
-  
   run();
 
-  lcd.clear();
-  lcdPrintInstruction(incomingMessage);
-  lcdPrintStatus(status);
+  if(digitalRead(2)){
+    lcdPrintCommand("ROBOT: GO");
+  }else{
+    lcdPrintCommand("ROBOT: STOP");
+  }
+   
+
+  
+
+  // lcdPrintStatus(status);
+  
 
 
   

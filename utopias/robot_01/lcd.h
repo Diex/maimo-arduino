@@ -27,6 +27,12 @@ void lcdPrintInstruction(byte instruction){
   if(instruction == 4) lcd.print("TURN RIGHT");  
 }
 
+void lcdPrintCommand(String cmd){
+  lcd.clear();
+  lcd.setCursor(0, 1);  
+  lcd.print(cmd);  
+}
+
 void lcdPrintStatus(byte status) {  
 
   lcd.setCursor(0, 0);  
