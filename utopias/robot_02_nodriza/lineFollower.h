@@ -16,11 +16,13 @@ int ease(float current, float prev, float factor)
 }
 
 void calibrateSensors(){
-	delay(100);
-	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
-		blackValue[i] = analogRead(sensors[i]);		
-		delay(10);
-	}
+	for(int times = 0; times < 10; times ++){
+		delay(100);
+		for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
+			blackValue[i] += analogRead(sensors[i]);		
+			blackValue[i] /= 2;
+		}
+	}	
 }
 
 void lineFollowerSetup()
@@ -44,15 +46,9 @@ void readSensors()
 
 void updateSensors(){
 	status = 0;
-	// Serial.print('R');
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++){
 		byte value = sensorsValue[i] > (blackValue[i] * 2) ? 1 : 0; // 0 estoy en la linea, 1 me sali		
 		status |= value << i;
-		// Serial.print(value & B00000001);
 	}	
-	// Serial.print('L');
-	// Serial.println();
-	
-	
 }
 

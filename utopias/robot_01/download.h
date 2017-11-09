@@ -84,38 +84,53 @@ void silence()
 boolean ledsReseted = false;
 unsigned long downloadingSpeed = 2E3;
 
-void playDownloading(unsigned long currentTime) {
+boolean playDownloading(unsigned long currentTime) {
   if(!ledsReseted){
     ledsReseted = showEmpty();
     Serial.println("reseting leds");
   }else{
-//    Serial.println("leds Reseted");
     for (int i = 0; i < NUMPIXELS; i++) {
       if (i == currentLed) {  
         pixels.setPixelColor(i, pixels.Color(0, 255, 0)); // Moderately bright green color.
       }      
     }
-    
+    pixels.show(); // This sends the updated pixel color to the hardware.
+
     if ((currentTime - pLedUpdate) >= downloadingSpeed) {
       pLedUpdate = currentTime;
       currentLed ++;            
-      if(currentLed > NUMPIXELS){        
+      if(currentLed >= NUMPIXELS){        
         action = WAITING;
         ledsReseted = false;
         reset();
         silence();
-        nextUpdate = currentTime + 5E3;
+        // nextUpdate = currentTime + 5E3;
+        delay(1000);
+        return true;
       }
     }
-    
-    pixels.show(); // This sends the updated pixel color to the hardware.
   }
+  return false;
 }
 
+int fadevalue = 0;
+int fadetime = 20;
+int fadedir = 1;
 
+void playInout(unsigned long currentTime)
+{
+    for (int i = 0; i < NUMPIXELS; i++) {     
+        pixels.setPixelColor(i, pixels.Color(fadevalue, fadevalue, fadevalue)); // Moderately bright green color.
+    }
 
+    pixels.show(); // This sends the updated pixel color to the hardware.
 
+    if ((currentTime - pLedUpdate) >= fadetime) {
+      fadevalue = constrain(fadevalue + 16 * fadedir, 0, 255);
+      fadedir = fadevalue <= 0 | fadevalue >= 255 ? fadedir * -1 : fadedir; 
+    }
 
+}
 
 
 // funciones del sonido.

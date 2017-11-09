@@ -2,31 +2,25 @@
 #include "lcd.h"
 #include "lineFollower.h"
 #include "CmdMessenger.h" // CmdMessenger
-
-#define GO            1
-#define DOWNLOADING   2
-#define WAITING       4
+// estados de control general del robot
+#define GO          1 // el robot avanza - usa el lineFollower
+#define DOWNLOADING 2
+#define WAITING     4
 int action = GO;
 
 
-unsigned long nextUpdate = 10E3;
-unsigned long timeout = 10E3;
-unsigned long pFrameTime = 0;        //
-
+unsigned long pFrameTime = 0; //
 int frameRate = 20;
-
-
 #include "download.h" // este archivo usa las variables anterios de tiempo... ^^^
 
-const int dataPin = 2; // the number of the pushbutton pin
-
 volatile int transmit = 0;
+unsigned long nextUpdate = 20E3;
+unsigned long timeout = 20E3;
+unsigned long timeToSwitchState = 20E3;
 
-
-
-void interr(){
+void interr()
+{
   transmit = !transmit; // digitalRead(2);
-  
 }
 
 // This will run only one time.
@@ -37,78 +31,67 @@ void setup()
   steerSetup();
   lcdSetup();
   downloadSetup();
-
   pinMode(dataPin, INPUT);
   attachInterrupt(0, interr, FALLING);
+  silence();
 }
-
-// unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
-// unsigned long debounceDelay = 50; // the debounce time; increase if the output flickers
-
-
-
 
 void loop()
 {
-  // if(transmit) {
-  //   lcdPrintCommand("ROBOT: GO");
-  // }else{
-  //   lcdPrintCommand("ROBOT: STOP");
-  // }
-
   delay(1); // gano tiempo...
   // ------------------------------------
   // Process incoming serial data, and perform callbacks
-  unsigned long currentTime = millis();  
-
+  unsigned long currentTime = millis();
   readSensors();
   updateSensors();
-
-  if (status == B00001111) // encontró un blanco, hasta que no encuentra una linea completa no para)
-  pathFinding();
-  
-  
-  if ((currentTime - pFrameTime) >= frameRate) {
+  if (status == B00001111)
+    // encontró un blanco, hasta que no encuentra una linea completa no para)
+  pathFinding(); // interrumpe -- usa while!
+  if ((currentTime - pFrameTime) >= frameRate)
+  {
     pFrameTime = currentTime;
-    switch (action) {
+    switch (action)
+    {
       case GO:
+      {
+        lcdPrintCommand("ROBOT: GO");
+        playKit();        
+        robotWalk();
+        
+        if (currentTime >= timeToSwitchState)
         {
-          lcdPrintCommand("ROBOT: GO");
-          if (currentTime >= nextUpdate) {
-             nextUpdate = currentTime + random(timeout)  ; // set up the next timeout period
-             action = action == GO ? DOWNLOADING : GO;
-
-            stop();
-            run();
-          }
-          
-          playKit();
-          silence();
-          robotWalk();
-          run();
-          break;
+          drive(0,0);
+          run();                  
+          action = DOWNLOADING;
         }
 
-        case DOWNLOADING:
+        break;
+      }
+      case DOWNLOADING:
+      {
+        lcdPrintCommand("ROBOT: DOWNLOADING");
+        playSound();
+        if(playDownloading(currentTime)){
+          currentTime = millis();
+          timeToSwitchState = currentTime + random(timeout); // set up the next timeout period
+          action = WAITING;          
+        };
+        break;
+      }
+      case WAITING:
+      {
+        lcdPrintCommand("ROBOT: WAITING");
+        if (currentTime >= timeToSwitchState)
         {
-          lcdPrintCommand("ROBOT: DOWNLOADING");
-          playSound();
-          playDownloading(currentTime);
-          
-          break;
-        }
-
-        case WAITING:
-        {
-          lcdPrintCommand("ROBOT: WAITING");
-          delay(3E3 + random(10E3));
-          nextUpdate = currentTime + random(timeout)  ; // set up the next timeout period
+          currentTime = millis();
+          timeToSwitchState = currentTime + timeout + random(timeout); // set up the next timeout period          
           action = GO;
-          break;
         }
+        playInout(currentTime);
+        break;
+      }
     }
   }
-  
 }
 
 void pathFinding()
@@ -177,6 +160,3 @@ void robotWalk()
       break;
   }
 }
-
-
-

@@ -49,6 +49,9 @@ void joy()
 	motors(-yv + xv, -yv - xv); // diferencial
 }
 
+// ----------------------------------------
+// control del robot.
+// ----------------------------------------
 void drive(int fb, int lr)
 {
 	xv = lr;
@@ -63,6 +66,9 @@ void rotate(int turn, int speed){
 void stop(){
 	drive(0,0);
 }
+
+// ----------------------------------------
+
 
 void run()
 {
