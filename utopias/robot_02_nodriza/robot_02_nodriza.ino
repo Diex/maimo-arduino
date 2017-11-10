@@ -1,6 +1,7 @@
 #include "pinDefinition.h"
 #include "steer.h"
 #include "lineFollower.h"
+#include "leds.h"
 // estados de control general del robot
 #define GO 1 // el robot avanza - usa el lineFollower
 #define DOWNLOADING 2
@@ -14,14 +15,16 @@ const int INV = B11111111;
 void setup()
 {
 	Serial.begin(9600);
+	Serial1.begin(600);
 	delay(3000);
 	lineFollowerSetup();
 	steerSetup();
 	// lcdSetup();
-	// downloadSetup();
+	downloadSetup();
 	// pinMode(dataPin, INPUT);
 	// attachInterrupt(0, interr, FALLING);
-	// silence();
+	silence();
+	ledsOn();
 }
 
 int direction = 1;
@@ -31,6 +34,8 @@ unsigned long turnDuration = 2E3;
 unsigned long turnStartTime = 0;
 unsigned long backwardsDuration = 1E3;
 unsigned long backwardsStartTime = 0;
+unsigned long downloadStartTime = 0;
+unsigned long downloadDuration = 8 * 2E3;
 void loop()
 {
 	// joy();
@@ -49,7 +54,9 @@ void loop()
 			case GO:
 			{
 				// lcdPrintCommand("ROBOT: GO");
-				// playKit();
+				playKit();
+
+
 				wander(millis());
 				if (detectBorder())
 				{
@@ -82,31 +89,37 @@ void loop()
 				else
 				{
 					turnDuration = random(1E3, 4E3);
-					action = GO;
+					action = DOWNLOADING;
+					// action = random(0, 1E3) < 100 ? DOWNLOADING : GO;
+					if(action == DOWNLOADING){
+						drive(0,0);
+						run();
+						downloadStartTime = millis();
+					 	for(int times = 0; times < 10; times ++){
+					 		Serial1.println("DOWNLOADING");
+					 		delay(10);
+					 	} 					
+					}
 				}
 				break;
 			}
 			case DOWNLOADING:
 			{
 				// lcdPrintCommand("ROBOT: DOWNLOADING");
-				// playSound();
-				// if(playDownloading(currentTime)){
-				// currentTime = millis();
-				// timeToSwitchState = currentTime + random(timeout); // set up the next timeout period
-				// action = WAITING;
+				// drive(0, 0);
+				// run();
+				playSound();
+				// // playDownloading(currentTime);
+				if(playDownloading(millis())){
+				// 	// currentTime = millis();
+				// 	// timeToSwitchState = currentTime + random(timeout); // set up the next timeout period
+				// 	action = GO;
 				// };
-				break;
-			}
-			case WAITING:
-			{
-				// lcdPrintCommand("ROBOT: WAITING");
-				// if (currentTime >= timeToSwitchState)
-				// {
-				// currentTime = millis();
-				// timeToSwitchState = currentTime + timeout + random(timeout); // set up the next timeout period
-				// action = GO;
-				// }
-				// playInout(currentTime);
+				// if(millis() - downloadStartTime > downloadDuration){
+					action = GO;	
+					silence();
+				}
+				
 				break;
 			}
 		}
@@ -118,12 +131,9 @@ const int W_TURN = 1;
 const int W_STEPS = 2;
 const int W_GO = 4;
 int wanderState = W_WAIT;
-unsigned long p_wait_time = 0;
 unsigned long p_wait_delay = 10E3; // ten secs
-unsigned long p_turn_time = 0;
-unsigned long p_turn_delay = 3E3;
-unsigned long p_steps_time = 0;
-unsigned long p_steps_delay = 3E3;
+unsigned long p_turn_delay = 1E3;
+unsigned long p_steps_delay = 1E3;
 unsigned long p_event_time = 0;
 int turnDirection = 1;
 void wander(unsigned long currentTime)
@@ -133,10 +143,11 @@ void wander(unsigned long currentTime)
 		case W_WAIT:
 			drive(0, 0);
 			run();
-			if (currentTime - p_wait_time > p_wait_delay)
+			
+			if (currentTime - p_event_time > p_wait_delay)
 			{
-				p_wait_time = currentTime;
-				p_wait_delay = random(5E3, 10E3);
+				p_event_time = currentTime;
+				p_wait_delay = random(5E3, 20E3);
 				wanderState = random(-1000, 1000) < 0? W_TURN:W_STEPS;
 			}
 			// do nothing
@@ -144,21 +155,22 @@ void wander(unsigned long currentTime)
 		case W_TURN:
 			rotate(turnDirection, med);
 			run();
-			if (currentTime - p_turn_time > p_turn_delay)
+			if (currentTime - p_event_time > p_turn_delay)
 			{
-				p_turn_time = currentTime;
-				// p_turn_delay = random(3E3, 5E3);
+				p_event_time = currentTime;
+				p_turn_delay = random(1E3, 3E3);
 				turnDirection = random(-1000, 1000) < 0? -1:1;
-				wanderState = random(-1000, 1000) < 0? W_WAIT:W_STEPS;
+				wanderState = random(0, 1000) > 100? W_WAIT:W_STEPS;
 			}
 			break;
 		case W_STEPS:
 			drive(-slow, 0);
 			run();
-			if (currentTime - p_steps_time > p_steps_delay)
+			if (currentTime - p_event_time > p_steps_delay)
 			{
-				p_steps_time = currentTime;
-				wanderState = random(0, 1000) < 500? W_WAIT:W_TURN;
+				p_event_time = currentTime;
+				p_steps_delay = random(1E3, 3E3);
+				wanderState = random(0, 1000) > 100? W_WAIT:W_TURN;
 			}
 			break;
 		default:

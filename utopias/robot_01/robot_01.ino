@@ -27,6 +27,7 @@ void interr()
 void setup()
 {
   Serial.begin(9600);
+  // Serial1.begin(600);
   lineFollowerSetup();
   steerSetup();
   lcdSetup();
@@ -36,10 +37,19 @@ void setup()
   silence();
 }
 
+String readString = "";
 void loop()
 {
+  // if(Serial1.available()){
+  //     while (Serial1.available() >0) {
+  //     char c = Serial.read();  //gets one byte from serial buffer
+  //     readString += c; //makes the string readString
+  //   } 
+  //   if(readString.compareTo("DOWNLOADING") == 0) action = DOWNLOADING;
+  // }
+
   delay(1); // gano tiempo...
-  // ------------------------------------
+ // ------------------------------------
   // Process incoming serial data, and perform callbacks
   unsigned long currentTime = millis();
   readSensors();
@@ -69,6 +79,7 @@ void loop()
       }
       case DOWNLOADING:
       {
+        
         lcdPrintCommand("ROBOT: DOWNLOADING");
         playSound();
         if(playDownloading(currentTime)){
