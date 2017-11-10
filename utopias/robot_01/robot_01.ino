@@ -37,7 +37,7 @@ void setup()
   silence();
 }
 
-String readString = "";
+// String readString = "";
 void loop()
 {
   // if(Serial1.available()){
@@ -54,9 +54,9 @@ void loop()
   unsigned long currentTime = millis();
   readSensors();
   updateSensors();
-  if (status == B00001111)
+  if (status == B00001111) pathFinding(); // interrumpe -- usa while!
     // encontró un blanco, hasta que no encuentra una linea completa no para)
-  pathFinding(); // interrumpe -- usa while!
+  
   if ((currentTime - pFrameTime) >= frameRate)
   {
     pFrameTime = currentTime;

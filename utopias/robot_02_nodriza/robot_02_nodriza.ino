@@ -89,8 +89,8 @@ void loop()
 				else
 				{
 					turnDuration = random(1E3, 4E3);
-					action = DOWNLOADING;
-					// action = random(0, 1E3) < 100 ? DOWNLOADING : GO;
+					// action = DOWNLOADING;
+					action = random(0, 1E3) < 100 ? DOWNLOADING : GO;
 					if(action == DOWNLOADING){
 						drive(0,0);
 						run();
@@ -106,16 +106,9 @@ void loop()
 			case DOWNLOADING:
 			{
 				// lcdPrintCommand("ROBOT: DOWNLOADING");
-				// drive(0, 0);
-				// run();
 				playSound();
 				// // playDownloading(currentTime);
 				if(playDownloading(millis())){
-				// 	// currentTime = millis();
-				// 	// timeToSwitchState = currentTime + random(timeout); // set up the next timeout period
-				// 	action = GO;
-				// };
-				// if(millis() - downloadStartTime > downloadDuration){
 					action = GO;	
 					silence();
 				}
