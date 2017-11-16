@@ -12,7 +12,7 @@ void setup() {
   // put your setup code here, to run once:
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
-
+  Serial.begin(115200);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -29,20 +29,22 @@ void setup() {
 String data;
 void loop() {
   // put your main code here, to run repeatedly:
-  if(Serial.available()){
+  if (Serial.available()) {
     data = Serial.readString();
-  }  
-  char str[256]; 
-  data.toCharArray(str, 256);
-  char * pch;  
-  pch = strtok (str," ,.-");
-  while (pch != NULL)
-  {
-    Serial.println(pch);
-    
-    pch = strtok (NULL, ",");
-  }
+    char str[256];
+    data.toCharArray(str, 256);
+    char * pch;
+    pch = strtok (str, " ,.-");
+    int count = 1;
+    while (pch != NULL)
+    {
+      pch = strtok (NULL, ",");
+      ThingSpeak.setField(count, pch);
+      count++;
+    }
 
-//  ThingSpeak.setField(1,pinVoltage);
+    ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+
+  }
 
 }
