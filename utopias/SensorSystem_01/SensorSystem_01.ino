@@ -2,6 +2,14 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <SimpleDHT.h>
+
+// for DHT11, 
+//      VCC: 5V or 3V
+//      GND: GND
+//      DATA: 2
+int pinDHT11 = 3;
+SimpleDHT11 dht11;
 
 // SD
 const int chipSelect = 4;
@@ -42,7 +50,9 @@ void setup() {
 
 void loop() {
   if(gotTrouble) return;
-  
+
+  // ----------------------------------------
+  // rtc
   String dataString = "";
 
   dataString += "20";
@@ -73,36 +83,24 @@ void loop() {
 
   
   // ----------------------------------------
-  int x,y,z; //triple axis data
-
-  //Tell the HMC what regist to begin writing data into
-  Wire.beginTransmission(addr);
-  Wire.write(0x03); //start with register 3.
-  Wire.endTransmission();
-  
- 
- //Read the data.. 2 bytes for each axis.. 6 total bytes
-  Wire.requestFrom(addr, 6);
-  if(6<=Wire.available()){
-    x = Wire.read()<<8; //MSB  x 
-    x |= Wire.read(); //LSB  x
-    z = Wire.read()<<8; //MSB  z
-    z |= Wire.read(); //LSB z
-    y = Wire.read()<<8; //MSB y
-    y |= Wire.read(); //LSB y
+  // DHT11
+  byte temperature = 0;
+  byte humidity = 0;
+  int err = SimpleDHTErrSuccess;
+  if ((err = dht11.read(pinDHT11, &temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+    //    Serial.print("Read DHT11 failed, err="); Serial.println(err);delay(1000);
+    temperature = -1;
+    humidity = -1;
+    //    return;
   }
-  
-  dataString += x;
+
+  dataString += (int)temperature;
   dataString += ",";
-  dataString += y;
-  dataString += ",";
-  dataString += z;
+  dataString += (int)humidity;
   dataString += ",";
 
-  Serial.println(dataString);
-
-  
-  
+  // ----------------------------------------
+//  Serial.println(dataString);
   // ----------------------------------------
 
 
@@ -129,7 +127,6 @@ void loop() {
     gotTrouble = true;
   }
   Serial.println(dataString);
-  
   delay(1000);
 }
 
