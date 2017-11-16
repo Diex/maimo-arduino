@@ -23,14 +23,20 @@ byte ADay, AHour, AMinute, ASecond, ABits;
 bool ADy, A12h, Apm;
 boolean gotTrouble = false;
 // Compass
-#define addr 0x1E //I2C Address for The HMC5883
 
+// Higro
+#define hygroPin A0
+
+
+// PH
+#define phtemp A3
+#define phval A2
 
 void setup() {
   Wire.begin();
   Serial.begin(115200);
-  //  setClock();
-  // analogReference(EXTERNAL);
+//    setClock();
+   
   
   Serial.print("Initializing SD card...");
   if (!SD.begin(chipSelect)) {
@@ -38,11 +44,6 @@ void setup() {
     gotTrouble = true;
     return;
   }
-
-  Wire.beginTransmission(addr); //start talking
-  Wire.write(0x02); // Set the Register
-  Wire.write(0x00); // Tell the HMC5883 to Continuously Measure
-  Wire.endTransmission();
 
   Serial.println("card initialized.");
   
@@ -100,9 +101,17 @@ void loop() {
   dataString += ",";
 
   // ----------------------------------------
-//  Serial.println(dataString);
-  // ----------------------------------------
+  // hygro
 
+  dataString += analogRead(hygroPin);
+  dataString += ",";
+  
+  // ----------------------------------------
+  // ph
+  dataString += analogRead(phtemp);
+  dataString += ",";
+  dataString += analogRead(phval);
+  dataString += ",";
 
   // uso un archivo por dia
   String filename = "20";
@@ -133,11 +142,11 @@ void loop() {
 void setClock() {
   Clock.setClockMode(false);
   Clock.setSecond(0);
-  Clock.setMinute(37);
-  Clock.setHour(21);
+  Clock.setMinute(5);
+  Clock.setHour(2);
   Clock.setDoW(5);
-  Clock.setDate(17);
-  Clock.setMonth(7);
+  Clock.setDate(16);
+  Clock.setMonth(11);
   Clock.setYear(17);
 }
 
