@@ -174,7 +174,8 @@ void wander(unsigned long currentTime)
 
 boolean detectBorder()
 {
-	return status != B00001111? true:false;
+	// return status != B00001111? true:false;
+	return status != B00001001? true:false;
 }
 
 int inferDirection()
