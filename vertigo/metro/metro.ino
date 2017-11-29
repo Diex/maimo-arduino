@@ -44,11 +44,11 @@ void loop()
 				position = pingPong(position, MAX_POSITION);
 				for (int i = 0; i < NUMPIXELS; i++)
 				{
-					leds[i] = (i == position)? 255: 0; //leds[i] - decay;
-					leds[i] = constrain(leds[i], 0, 255);
+					leds[i] = (i == position)? 255: leds[i]; //leds[i] - decay;
+					// leds[i] = constrain(leds[i], 0, 255);
 					pixels.setPixelColor(i, pixels.Color(leds[i], leds[i], leds[i])); 
 				}
-				
+				applyDecay(leds, 20);
 				pixels.show();	
 			}
 			
@@ -76,3 +76,9 @@ int pingPong(int position, int maxPos)
 	return newpos; 
 }
 
+void applyDecay(byte leds[], byte decay)
+{
+	for(int i=0; i<NUMPIXELS; i++){
+		leds[i] = constrain(leds[i] - decay, 0, 255);
+	}
+}
