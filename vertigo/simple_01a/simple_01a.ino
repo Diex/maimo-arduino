@@ -11,7 +11,7 @@
 #define PIN            6
 
 // How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS      353
+#define NUMPIXELS      58
 
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
 // Note that for older NeoPixel strips you might need to change the third parameter--see the strandtest
@@ -32,14 +32,8 @@ long duration, distance; // Duration used to calculate distance
 
 
 void setup() {
-  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-#if defined (__AVR_ATtiny85__)
-  if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
-#endif
-  // End of trinket special code
-
   pixels.begin(); // This initializes the NeoPixel library.
-
+  // sensor
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(LEDPin, OUTPUT); // Use LED indicator (if required)
@@ -52,7 +46,7 @@ int offset = 0;
 int current = 0;
 
 float maxSpeed = 0.0002;
-float speed = 0.0002;
+float speed = 0.002;
 #define MULT 1e4
 int decay = 5;
 
@@ -65,9 +59,7 @@ int state = RUNNING;
 int limit = 175;
 
 void loop() {
-//delay(100);
   sensor();
-//
   if (distance < limit) {
     state = RUNNING;
   } else {
@@ -77,8 +69,8 @@ void loop() {
   switch (state) {
 
     case RUNNING:
-      // speed control
-      speed = sin(millis() * 0.001) * maxSpeed; 
+
+
       current = map(sin(millis() * speed) * MULT, -MULT, MULT, 0, NUMPIXELS);
 
       current = (current + 1) % NUMPIXELS;
