@@ -10,6 +10,9 @@
 #define NUMPIXELS 56
 #define MAX_POSITION NUMPIXELS-1
 
+#define TEMPO A0
+#define DECAY A1
+
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 byte leds[NUMPIXELS];
 
@@ -25,12 +28,13 @@ void setup()
 int position = 0;
 int decay = 10;
 
-int frameDuration = 2;
+int frameDuration = 1;
 unsigned long frameCount = 0;
-byte speed = 255;
+
 
 unsigned long minPeriod = frameDuration * NUMPIXELS;
 unsigned long lastStep = 0;
+int bpm = 60;
 void loop()
 {
 			// enterFrame();
@@ -39,7 +43,7 @@ void loop()
 			// position = (frameCount * speed >> 8) % NUMPIXELS;
 
 			// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-			if(frameStart - lastStep > 60E3 / 60 / NUMPIXELS){ 
+			if(frameStart - lastStep > 60E3 / bpm / NUMPIXELS){ 
 				lastStep = frameStart;
 				position = pingPong(position, MAX_POSITION);
 				for (int i = 0; i < NUMPIXELS; i++)
@@ -48,11 +52,12 @@ void loop()
 					// leds[i] = constrain(leds[i], 0, 255);
 					pixels.setPixelColor(i, pixels.Color(leds[i], leds[i], leds[i])); 
 				}
-				applyDecay(leds, 20);
+				applyDecay(leds, decay);
 				pixels.show();	
 			}
 			
-
+			decay = map(analogRead(DECAY), 0, 1024, 0, 255);
+			bpm = map(analogRead(TEMPO), 0, 1024, 20, 600);
 			// exitFrame();
 			// basicamente desperdicio el tiempo que me sobro.
 			digitalWrite(13, HIGH);
