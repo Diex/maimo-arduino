@@ -7,7 +7,7 @@
 #endif
 
 #define PIN 6
-#define NUMPIXELS 56
+#define NUMPIXELS 352
 #define MAX_POSITION NUMPIXELS-1
 
 #define TEMPO A0
@@ -28,7 +28,7 @@ void setup()
 int position = 0;
 int decay = 10;
 
-int frameDuration = 1;
+int frameDuration = 6; // 6 ms tiempo minimo
 unsigned long frameCount = 0;
 
 
@@ -40,10 +40,8 @@ void loop()
 			// enterFrame();
 			unsigned long frameStart = millis();						
 			// beginDraw();
-			// position = (frameCount * speed >> 8) % NUMPIXELS;
-
 			// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-			if(frameStart - lastStep > 60E3 / bpm / NUMPIXELS){ 
+			if(frameStart - lastStep > 60E3 / bpm){ 
 				lastStep = frameStart;
 				position = pingPong(position, MAX_POSITION);
 				for (int i = 0; i < NUMPIXELS; i++)
@@ -62,7 +60,7 @@ void loop()
 			// basicamente desperdicio el tiempo que me sobro.
 			digitalWrite(13, HIGH);
 			while(millis() - frameStart < frameDuration){}
-			frameCount ++;
+			
 			digitalWrite(13, LOW);
 			
 }
