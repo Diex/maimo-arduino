@@ -25,7 +25,7 @@ int bpm = 60;
 
 
 int frameStepTime = 1; // ms
-
+#define MIN_SPEED 10;
 #define MAX_SPEED 10E3  // 10000
 // hay un cabezal "playhead" que se mueve
 // todas las animaciones en el circulo se generan "moviendo" este playhead
@@ -63,8 +63,10 @@ void loop()
 
 void draw()
 {
-
-    forward(playhead, step, speed);
+    float d = (sin(millis() * 0.005) + 1) / 2 ; //map(* MAX_SPEED, 0, MAX_SPEED, MAX_SPEED/2, MAX_SPEED);
+    unsigned long s = map(d * 10E3, 0, 10E3, MIN_SPEED, MAX_SPEED);
+    Serial.println(s);
+    forward(playhead, step, s);
 //  fastest(playhead);
 
 }
