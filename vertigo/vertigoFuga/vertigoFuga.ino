@@ -60,6 +60,7 @@ void loop()
 }
 
 
+int direction = -1;
 
 void draw()
 {
@@ -71,7 +72,15 @@ void draw()
 
     pixels.clear();
     applyDecay(white, 20);  // el segund parametro es cuan rapido quiero que decaiga
-    backwards(playhead, step, s);  // actualizo la posicion
+    
+    if(direction == -1){
+      backwards(playhead, step, s); 
+    }else{      
+      forward(playhead, step, s); 
+    }
+    // randomizo la direccion
+    if(random(1000) < 1) direction *= -1; 
+    
     render(white);  // le paso la data a los leds
 
 }
