@@ -25,7 +25,7 @@ int bpm = 60;
 
 
 int frameStepTime = 1; // ms
-#define MIN_SPEED 10;
+#define MIN_SPEED 10
 #define MAX_SPEED 10E3  // 10000
 // hay un cabezal "playhead" que se mueve
 // todas las animaciones en el circulo se generan "moviendo" este playhead
@@ -63,33 +63,41 @@ void loop()
 
 void draw()
 {
-    float d = (sin(millis() * 0.005) + 1) / 2 ; //map(* MAX_SPEED, 0, MAX_SPEED, MAX_SPEED/2, MAX_SPEED);
+    // calculo una variacion en float basado en un sin()
+    // dSpeed es que tan rapido cambia el parametro
+    float dSpeed = 0.0025;
+    float d = (sin(millis() * dSpeed) + 1) / 2 ; 
     unsigned long s = map(d * 10E3, 0, 10E3, MIN_SPEED, MAX_SPEED);
-    Serial.println(s);
+
+    // si uso clear no tengo decay
+    pixels.clear();
+    applyDecay(white, 20);
     forward(playhead, step, s);
-//  fastest(playhead);
+    render(white);
 
 }
 void forward(int &playhead, unsigned long &step, unsigned long speed)
 { 
   step += speed;
   playhead = step > 10E3 ? (playhead + 1) % NUMPIXELS : playhead;  
-  step = step > 10E3 ? 0 : step;
-  pixels.clear();
-  white[playhead] = 255;
-  pixels.setPixelColor(playhead, pixels.Color(white[playhead], white[playhead], white[playhead]));  
-  pixels.show();
+  step = step > 10E3 ? 0 : step;  
+  white[playhead] = 255;  
 }
 
 void fastest(int &playhead)
 { 
   playhead = (playhead + 1) % NUMPIXELS;  
-  pixels.clear();
   white[playhead] = 255;
-  pixels.setPixelColor(playhead, pixels.Color(white[playhead], white[playhead], white[playhead]));  
-  pixels.show();
+  
 }
 
+void render(byte white[])
+{
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(white[i], white[i], white[i]));      
+  } 
+  pixels.show();
+}
 boolean up = true;
 int pingPong(int position, int maxPos)
 {
@@ -104,9 +112,10 @@ int pingPong(int position, int maxPos)
   return newpos;
 }
 
-void applyDecay(byte leds[], byte decay)
+
+void applyDecay(byte white[], byte decay)
 {
   for (int i = 0; i < NUMPIXELS; i++) {
-    leds[i] = constrain(leds[i] - decay, 0, 255);
+    white[i] = constrain(white[i] - decay, 0, 255);
   }
 }
