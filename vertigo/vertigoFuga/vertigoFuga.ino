@@ -69,17 +69,26 @@ void draw()
     float d = (sin(millis() * dSpeed) + 1) / 2 ; 
     unsigned long s = map(d * 10E3, 0, 10E3, MIN_SPEED, MAX_SPEED);
 
-    // si uso clear no tengo decay
     pixels.clear();
-    applyDecay(white, 20);
-    forward(playhead, step, s);
-    render(white);
+    applyDecay(white, 20);  // el segund parametro es cuan rapido quiero que decaiga
+    backwards(playhead, step, s);  // actualizo la posicion
+    render(white);  // le paso la data a los leds
 
 }
+
+
 void forward(int &playhead, unsigned long &step, unsigned long speed)
 { 
   step += speed;
   playhead = step > 10E3 ? (playhead + 1) % NUMPIXELS : playhead;  
+  step = step > 10E3 ? 0 : step;  
+  white[playhead] = 255;  
+}
+
+void backwards(int &playhead, unsigned long &step, unsigned long speed)
+{ 
+  step += speed;
+  playhead = step > 10E3 ? (playhead - 1) < 0 ? NUMPIXELS : (playhead -1) : playhead;  
   step = step > 10E3 ? 0 : step;  
   white[playhead] = 255;  
 }
