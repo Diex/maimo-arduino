@@ -6,6 +6,7 @@
 int sharp = A0;
 int closest = 100;
 void setup() {
+  analogReference(INTERNAL);
   Serial.begin(115200);
   setupMP3();
 }
@@ -16,7 +17,7 @@ const int PLAYING = 1;
 int state = IDLE;
 
 
-SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
+SoftwareSerial mySoftwareSerial(10, 11); // RX, TX pines 2 y 3 en el board
 DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
@@ -31,7 +32,7 @@ boolean playing = false;
 
 void loop() {
 
-  boolean presence = sensor(true) > 32 ? true : false;
+  boolean presence = sensor(true) > 95 ? true : false;
   String data = ">> ";
   data += presence;
   data += " : ";

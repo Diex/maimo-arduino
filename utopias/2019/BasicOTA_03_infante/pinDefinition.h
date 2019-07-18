@@ -33,14 +33,6 @@ const int SERIAL_1_RX = 19; // mal rotulado en mi placa mega
 
 const int xjoy = A0;
 const int yjoy = A0;
-// SENSORES SEGUIDOR DE LINEA 
-// los sensores estan definidos viendo al robot desde arriba
-// L1 L2 -- -- R2 R1
-const int CNY_R1 = A4;
-const int CNY_R2 = A5;
-const int CNY_L2 = A6;
-const int CNY_L1 = A7;
-
 
 
 

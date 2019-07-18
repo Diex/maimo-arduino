@@ -2,16 +2,18 @@
 #include "lcd.h"
 #include "lineFollower.h"
 #include "CmdMessenger.h" // CmdMessenger
+#include "download.h" // este archivo usa las variables anterios de tiempo... ^^^
+
 // estados de control general del robot
 #define GO          1 // el robot avanza - usa el lineFollower
 #define DOWNLOADING 2
 #define WAITING     4
 int action = GO;
 
-
 unsigned long pFrameTime = 0; //
 int frameRate = 20;
-#include "download.h" // este archivo usa las variables anterios de tiempo... ^^^
+
+
 
 volatile int transmit = 0;
 unsigned long nextUpdate = 20E3;
