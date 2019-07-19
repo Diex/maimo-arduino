@@ -4,10 +4,11 @@
 // SENSORES SEGUIDOR DE LINEA 
 // los sensores estan definidos viendo al robot desde arriba
 // L1 L2 -- -- R2 R1
-const int CNY_R1 = D1;
-const int CNY_R2 = D2;
-const int CNY_L2 = D3;
-const int CNY_L1 = D4;
+const int CNY_R1 = D8;
+const int CNY_R2 = D7;
+const int CNY_CE = D6;
+const int CNY_L2 = D5;	// S2
+const int CNY_L1 = D4;  // S1 en el sensor nuevo
 
 
 int sensors[] = {CNY_L1, CNY_L2, CNY_R2, CNY_R1};
