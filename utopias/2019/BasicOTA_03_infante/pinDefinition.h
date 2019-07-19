@@ -3,13 +3,7 @@
 #ifndef _PIN_DEFS_
 #define _PIN_DEFS_
 
-// PWM en mega del 0 al 13, 44, 45 y 46
-// Motor A
-const int motorPin1 = 9; // Pin 14 of L293
-const int motorPin2 = 10; // Pin 10 of L293
-// Motor B
-const int motorPin3 = 6; // Pin  7 of L293
-const int motorPin4 = 5; // Pin  2 of L293
+
 
 const int BUZZER 	= 12;
 const int LEDS_PIN  = 7;
@@ -31,8 +25,8 @@ const int dataPin = 2; // the number of the pushbutton pin
 
 const int SERIAL_1_RX = 19; // mal rotulado en mi placa mega
 
-const int xjoy = A0;
-const int yjoy = A0;
+// const int xjoy = A0;
+// const int yjoy = A0;
 
 
 

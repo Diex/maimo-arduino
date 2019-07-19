@@ -11,7 +11,7 @@ const int CNY_L2 = D5;	// S2
 const int CNY_L1 = D4;  // S1 en el sensor nuevo
 
 
-int sensors[] = {CNY_L1, CNY_L2, CNY_R2, CNY_R1};
+int sensors[] = {CNY_L1, CNY_L2, CNY_CE, CNY_R2, CNY_R1};
 int blackValue[sizeof(sensors)/sizeof(int)];
 int sensorsValue[sizeof(sensors)/sizeof(int)];
 byte status = 0;
@@ -24,38 +24,38 @@ int ease(float current, float prev, float factor)
 	return (unsigned int) (prev * factor) + (current * (1 - factor));
 }
 
-void calibrateSensors(){
-	delay(100);
-	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
-		blackValue[i] = analogRead(sensors[i]);		
-		delay(10);
-	}
-}
+// void calibrateSensors(){
+// 	delay(100);
+// 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
+// 		blackValue[i] = analogRead(sensors[i]);		
+// 		delay(10);
+// 	}
+// }
 
 void lineFollowerSetup()
 {
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) pinMode(sensors[i], INPUT);
-	calibrateSensors();
+	// calibrateSensors();
 }
 
 
 
-void readSensors()
-{
-	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
-		sensorsValue[i] = ease(analogRead(sensors[i]), sensorsValue[i], factor);		
-		Serial.print(sensorsValue[i]);
-		Serial.print("\t");
-	}	
+// void readSensors()
+// {
+// 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
+// 		sensorsValue[i] = ease(analogRead(sensors[i]), sensorsValue[i], factor);		
+// 		Serial.print(sensorsValue[i]);
+// 		Serial.print("\t");
+// 	}	
 
-	Serial.println();
-}
+// 	Serial.println();
+// }
 
 void updateSensors(){
 	status = 0;
 	// Serial.print('R');
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++){
-		byte value = sensorsValue[i] > (blackValue[i] * 2) ? 1 : 0; // 0 estoy en la linea, 1 me sali		
+		byte value = sensorsValue[i] > 0 ? 1 : 0; // 0 estoy en la linea, 1 me sali		
 		status |= value << i;
 		// Serial.print(value & B00000001);
 	}	
@@ -64,4 +64,19 @@ void updateSensors(){
 	
 	
 }
+
+void readSensors()
+{
+	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
+		sensorsValue[i] = digitalRead(sensors[i]); // ease(digitalRead(sensors[i]), sensorsValue[i], factor);		
+		Serial.print(sensorsValue[i]);
+		Serial.print("\t");
+	}	
+
+	Serial.println();
+	updateSensors();
+}
+
+
+
 

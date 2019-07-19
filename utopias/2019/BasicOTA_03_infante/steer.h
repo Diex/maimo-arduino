@@ -17,6 +17,18 @@ int slow = 200;
 int med = 300;
 int full = 1000;
 
+// PWM en mega del 0 al 13, 44, 45 y 46
+// Motor A
+const int motorPin2 = D0; //10; // Pin 10 of L293 ROJO - IN1
+const int motorPin1 = D1; // 9; // Pin 14 of L293  NARANJA - IN2
+
+// Motor B
+const int motorPin3 = D2; // 6; // Pin  7 of L293 AMARILLO  - IN3
+const int motorPin4 = D3; //5; // Pin  2 of L293 VERDE - IN4
+
+
+
+
 void steerSetup()
 {
 	// Set pins as outputs
@@ -24,8 +36,8 @@ void steerSetup()
 	pinMode(motorPin2, OUTPUT);
 	pinMode(motorPin3, OUTPUT);
 	pinMode(motorPin4, OUTPUT);
-	pinMode(xjoy, INPUT);
-	pinMode(yjoy, INPUT);
+	// pinMode(xjoy, INPUT);
+	// pinMode(yjoy, INPUT);
 	// pinMode(A2, INPUT_PULLUP);
 	delay(1000); // dice el manual sobre usar analog como input.
 	// medx = analogRead(xjoy); // el joystick por default está en el medio
