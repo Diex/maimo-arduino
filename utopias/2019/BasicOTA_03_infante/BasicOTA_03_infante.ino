@@ -38,13 +38,13 @@ void handleRoot() {
  
 void handleFrontSensors() {
  
- // String data = "00000000";
- // for(int i = 0; i < sizeof(byte); i++)
- // {
- //    data += status >> i & 1 ? "1" : "0";
- // }
+ String data = ">>";
+ for(int i = 0; i < 8; i++)
+ {
+    data += (status >> i) & 1 ? "1" : "0";
+ }
 
- server.send(200, "text/plane", String(status, BIN)); //Send ADC value only to client ajax request
+ server.send(200, "text/plane", data); //Send ADC value only to client ajax request
 }
 
 
@@ -68,13 +68,16 @@ void handleNotFound()
 
 
 
-
-
-
 void setup()
 {
+  pinMode(1, FUNCTION_3); 
+  pinMode(3, FUNCTION_3); 
+
   Serial.begin(115200);
   Serial.println("Booting");
+
+
+  lineFollowerSetup();
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -105,7 +108,6 @@ void setup()
   Serial.println("HTTP server started");
   
   // infante
-  lineFollowerSetup();
   steerSetup();
   testSequence();
 }

@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "pinDefinition.h"
+
 int xv = 0;
 int yv = 0;
 
@@ -16,13 +16,13 @@ int full = 1000;
 
 // PWM en mega del 0 al 13, 44, 45 y 46
 // Motor A
-const int motorPin2 = D0; //10; // Pin 10 of L293 ROJO - IN1
-const int motorPin1 = D1; // 9; // Pin 14 of L293  NARANJA - IN2
+const int motorPin1 = 11; 
+const int motorPin2 = 10; 
+
 
 // Motor B
-const int motorPin3 = D2; // 6; // Pin  7 of L293 AMARILLO  - IN3
-const int motorPin4 = D3; //5; // Pin  2 of L293 VERDE - IN4
-
+const int motorPin3 = 9; 
+const int motorPin4 = 3; 
 
 
 
@@ -33,14 +33,8 @@ void steerSetup()
 	pinMode(motorPin2, OUTPUT);
 	pinMode(motorPin3, OUTPUT);
 	pinMode(motorPin4, OUTPUT);
-	// pinMode(xjoy, INPUT);
-	// pinMode(yjoy, INPUT);
-	// pinMode(A2, INPUT_PULLUP);
 	delay(1000); // dice el manual sobre usar analog como input.
-	// medx = analogRead(xjoy); // el joystick por default está en el medio
-	// medy = analogRead(yjoy);
-	// maxx = medx * 2;
-	// maxy = medy * 2;
+	
 }
 
 void motors(int m1, int m2)
@@ -49,32 +43,7 @@ void motors(int m1, int m2)
 	rwheel = m2; // (-yv - xv);
 }
 
-// (-Y + X) / 1000.0
-// (-Y - X) / 1000.0
-// void joy()
-// {
-// 	xv = constrain(map(analogRead(xjoy), 0, maxx, -1000, 1000), -1000, 1000);
-// 	yv = constrain(map(analogRead(yjoy), 0, maxy, 1000, -1000), -1000, 1000);
-// 	motors(-yv + xv, -yv - xv); // diferencial
-// }
 
-// ----------------------------------------
-// control del robot.
-// ----------------------------------------
-void drive(int fb, int lr)
-{
-	xv = lr;
-	yv = -fb;
-	motors(-yv + xv, -yv - xv); // diferencial
-}
-
-void rotate(int turn, int speed){
-  motors(turn * speed, turn * -speed);
-}
-
-void stop(){
-	drive(0,0);
-}
 
 // ----------------------------------------
 
@@ -83,39 +52,84 @@ void run()
 {
 	m1 = map(lwheel, -1000, 1000, 0, 255);
 	m2 = map(lwheel, -1000, 1000, 255, 0);
-	m3 = map(rwheel, -1000, 1000, 0, 255);
-	m4 = map(rwheel, -1000, 1000, 255, 0);
-	// Serial.print(m1);
-	// Serial.print('\t');
-	// Serial.print(m2);
-	// Serial.print('\t');
-	// Serial.print(m3);
-	// Serial.print('\t');
-	// Serial.print(m4);
-	// Serial.print('\n');
+	
+	m3 = map(rwheel, -1000, 1000, 255, 0);
+	m4 = map(rwheel, -1000, 1000, 0, 255);
+	
 	analogWrite(motorPin1, m1);
 	analogWrite(motorPin2, m2);
+	
 	analogWrite(motorPin3, m3);
 	analogWrite(motorPin4, m4);
 }
 
-void testSequence2()
-{
-	drive(1000, 0);
+
+void testSequence3(){
+
+	motors(1000, 1000);
+	run();
+	delay(1000);
+
+	motors(-1000, -1000);
+	run();
+	delay(1000);
+
+	return;
+
+	motors(1000, -1000); // Derecha
+	run();
+	delay(1000);
+
+	motors(-1000, 1000); // izquierda
 	run();
 	delay(2000);
-	drive(-1000, 0);
+
+	motors(1000, -1000);
+	run();
+	delay(1000);
+
+
+
+	motors(500, -500);
+	run();
+	delay(1000);
+
+	motors(-500, 500);
 	run();
 	delay(2000);
-	drive(-500, 500);
+
+	motors(500, -500);
+	run();
+	delay(1000);
+
+	motors(250, -250);
+	run();
+	delay(1000);
+
+	motors(-250, 250);
 	run();
 	delay(2000);
-	drive(-500, -500);
+
+	motors(250, -250);
+	run();
+	delay(1000);
+
+
+	motors(250, 250);
 	run();
 	delay(2000);
-	drive(0, 0);
+
+	motors(-250, -250);
 	run();
+	delay(2000);
+
+	motors(0,0);
+	run();
+
+
 }
+
+
 
 void testSequence()
 {

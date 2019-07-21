@@ -3,14 +3,13 @@
 // SENSORES SEGUIDOR DE LINEA 
 // los sensores estan definidos viendo al robot desde arriba
 // L1 L2 -- -- R2 R1
-const int CNY_R1 = D7;
-const int CNY_R2 = D6;
-// const int CNY_CE = D6;  // sale.. no tengo mas lugar en el nodeMCU
-const int CNY_L2 = D5;	// S2
-const int CNY_L1 = D4;  // S1 en el sensor nuevo
+const int CNY_L1 = 4;  // S1 en el sensor nuevo
+const int CNY_L2 = 5;	// S2
+const int CNY_CE = 6;  
+const int CNY_R2 = 7;
+const int CNY_R1 = 8;
 
-
-int sensors[] = {CNY_L1, CNY_L2, CNY_R2, CNY_R1};
+int sensors[] = {CNY_L1, CNY_L2, CNY_CE, CNY_R2, CNY_R1};
 int blackValue[sizeof(sensors)/sizeof(int)];
 int sensorsValue[sizeof(sensors)/sizeof(int)];
 byte status = 0;
@@ -28,6 +27,8 @@ void updateSensors(){
 	}
 }
 
+
+
 void readSensors()
 {
 	for(int i = 0; i < sizeof(sensors)/sizeof(int); i++) {
@@ -37,7 +38,7 @@ void readSensors()
 	}	
 
 	Serial.println();
-	updateSensors();
+	
 }
 
 
