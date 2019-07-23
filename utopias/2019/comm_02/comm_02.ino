@@ -25,54 +25,53 @@ void handleButton() {
 }
 
 
-char *message;
-char data[256];
-int messageId = -1;
+#define LED 2
 
 #define DATA_IN   2
 #define SHOW_DATA 1
 #define ROBOT_GO  0
 
 
-char datain[] = "datain";
-char showdata[] = "showdata";
-char robotgo[] = "robotgo";
+const char datain[] = "datain";
+const char showdata[] = "showdata";
+const char robotgo[] = "robotgo";
 
+
+char *message;
+int messageId = -1;
+
+char notes[256];
 int dataValue = 0;
 
-boolean newdata = false;
 boolean newmessage = false;
 
-#define LED 2
-
 void handleMessage() {
-  
+
   newmessage = true;
-  
+
   char arg[256];
   char val[256];
 
-  for (uint8_t i = 0; i < server.args(); i++) {    
-    
+  for (uint8_t i = 0; i < server.args(); i++) {
+
     Serial.print(server.argName(i));
     Serial.print(": ");
     Serial.println(server.arg(i));
-    
+
 
     server.argName(i).toCharArray(arg, 256);
     server.arg(i).toCharArray(val, 256);
-    
+
     if (strncmp(arg, datain, strlen(datain)) == 0) {
       messageId = DATA_IN;
-      
-      if (!newdata) { 
-        server.arg(i).toCharArray(data, 256);
-        newdata = true;     
-      }
+      server.arg(i).toCharArray(notes, 256);
 
-    }else if(strncmp(arg, robotgo, strlen(robotgo)) == 0){
+    } else if (strncmp(arg, robotgo, strlen(robotgo)) == 0) {
       messageId = ROBOT_GO;
-      dataValue = (strncmp(val, "0", 1) == 0) ? 0 : 1; 
+      dataValue = (strncmp(val, "0", 1) == 0) ? 0 : 1;
+    } else if (strncmp(arg, showdata, strlen(showdata)) == 0) {
+      messageId = SHOW_DATA;
+      dataValue = atoi(val);
     }
   }
 
@@ -83,6 +82,18 @@ void handleMessage() {
   // server.send(303);                         // Send it back to the browser with an HTTP status 303 (See Other) to redirect
 }
 
+
+int penta[] = {200, 225, 250, 300, 333, 400, 450, 500, 600, 666};
+
+
+
+void toneESP(uint8_t _pin, unsigned int frequency, unsigned long duration) {
+  pinMode (_pin, OUTPUT );
+  analogWriteFreq(frequency);
+  analogWrite(_pin, 500);
+  delay(duration);
+  analogWrite(_pin, 0);
+}
 
 
 void setup() {
@@ -140,28 +151,45 @@ void setup() {
 void loop() {
   MDNS.update();
   server.handleClient();
- 
+
   processMessage(); // tone(3, random(1000), 100);
 
 }
 
-void processMessage(){
-  if(!newmessage) return;
-  
+
+
+void processMessage() {
+  if (!newmessage) return;
+
   Serial.println("new message");
 
   newmessage = false;
+  int delay = 0;
+  long now = 0;
 
-  switch(messageId){
-    case ROBOT_GO:
-      digitalWrite(LED, dataValue);
+  switch (messageId) {
+  case ROBOT_GO:
+    digitalWrite(LED, dataValue);
     break;
 
-    case SHOW_DATA:
-      // blabla...
+  case SHOW_DATA:
+    delay = dataValue;
+    now = millis();
+
+    for(int note = 0; note < strlen(notes); note++) {  // voy a terminar cuando encuentro el caracter 'E'      
+      if(notes[note] == 'E') break;
+    // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
+      toneESP(D8,  penta[notes[note] - '0'], dataValue);
+      Serial.print(notes[note] - '0');
+      Serial.print(':');
+      Serial.print(penta[notes[note] - '0']);
+      Serial.print(':');
+    }
+
+  // blabla...
     break;
 
-    case DATA_IN:
+  case DATA_IN:
 
     break;
 
