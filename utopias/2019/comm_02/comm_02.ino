@@ -2,6 +2,10 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 
+
+// Neopixel
+#include <Adafruit_NeoPixel.h>
+
 // server de control del robot infante
 
 const char* ssid     = "suckmykiss";  // the ssid/name of the wifi, the esp will be connected to
@@ -45,6 +49,14 @@ int dataValue = 0;
 
 boolean newmessage = false;
 
+
+// Neopixel Config
+#define NeoPIN D7
+#define NUM_LEDS 8
+int brightness = 150;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, NeoPIN, NEO_RGB + NEO_KHZ800);
+
+
 void handleMessage() {
 
   newmessage = true;
@@ -84,13 +96,14 @@ void handleMessage() {
 
 
 int penta[] = {200, 225, 250, 300, 333, 400, 450, 500, 600, 666};
+int colors[] = {0x95329F, 0xFB35A7, 0x9F70BE, 0x8CDE10, 0x3BBAFF,  0xCF332B, 0xE8DA04, 0x4C7F1D, 0xD9EA57, 0xCF32B0};
 
 
 
 void toneESP(uint8_t _pin, unsigned int frequency, unsigned long duration) {
   pinMode (_pin, OUTPUT );
   analogWriteFreq(frequency);
-  analogWrite(_pin, 500);
+  analogWrite(_pin, 500);  
   delay(duration);
   analogWrite(_pin, 0);
 }
@@ -145,6 +158,12 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
+  strip.setBrightness(brightness);
+  strip.begin();
+  strip.show(); 
+  delay(50);
+  Serial.println("NeoPixel started");
+
 
 }
 
@@ -156,6 +175,26 @@ void loop() {
 
 }
 
+
+void setNeoColor(int value){
+  Serial.print("Setting Neopixel...");
+  // converting Hex to Int
+  int number = value; // (int) strtol( &value[1], NULL, 16);
+  
+  // splitting into three parts
+  int r = number >> 16;
+  int g = number >> 8 & 0xFF;
+  int b = number & 0xFF;
+  
+  // setting whole strip to the given color
+  for(int i=0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color( g, r, b ) );
+  }
+ 
+  strip.show();
+  
+ 
+}
 
 
 void processMessage() {
@@ -179,7 +218,9 @@ void processMessage() {
     for(int note = 0; note < strlen(notes); note++) {  // voy a terminar cuando encuentro el caracter 'E'      
       if(notes[note] == 'E') break;
     // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
+      setNeoColor(colors[notes[note] - '0']);
       toneESP(D8,  penta[notes[note] - '0'], dataValue);
+      setNeoColor(0);
       Serial.print(notes[note] - '0');
       Serial.print(':');
       Serial.print(penta[notes[note] - '0']);
