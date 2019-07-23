@@ -6,6 +6,8 @@
 // Neopixel
 #include <Adafruit_NeoPixel.h>
 
+// https://tttapa.github.io/ESP8266/Chap10%20-%20Simple%20Web%20Server.html
+// https://github.com/tzapu/WiFiManager
 // server de control del robot infante
 
 const char* ssid     = "suckmykiss";  // the ssid/name of the wifi, the esp will be connected to
@@ -29,7 +31,7 @@ void handleButton() {
 }
 
 
-#define LED 2
+#define LED D2
 
 #define DATA_IN   2
 #define SHOW_DATA 1
