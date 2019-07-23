@@ -1,19 +1,19 @@
 #include "Arduino.h"
 
-int xv = 0;
-int yv = 0;
 
-int m1 = 0;
-int m2 = 0;
-int m3 = 0;
-int m4 = 0;
-int rwheel = 0;
-int lwheel = 0;
 
-int slow = 200;
-int med = 300;
-int full = 1000;
+// Differential Steering Joystick Algorithm
+// ========================================
+//   by Calvin Hass
+//   https://www.impulseadventure.com/elec/
+//
+// Converts a single dual-axis joystick into a differential
+// drive motor control, with support for both drive, turn
+// and pivot operations.
+//
 
+// https://www.impulseadventure.com/elec/robot-differential-steering.html
+// https://www.mathworks.com/help/supportpkg/arduino/examples/arduino-robot-line-follower-application.html
 // PWM en mega del 0 al 13, 44, 45 y 46
 // Motor A
 const int motorPin1 = 11; 
@@ -26,6 +26,41 @@ const int motorPin4 = 3;
 
 
 
+// INPUTS
+int xv = 0; // x -1000/1000
+int yv = 0; // y -1000/1000
+
+int m1 = 0;
+int m2 = 0;
+int m3 = 0;
+int m4 = 0;
+
+
+// OUTPUTS
+int     nMotMixL;           // Motor (left)  mixed output           (-128..+127)
+int     nMotMixR;           // Motor (right) mixed output           (-128..+127)
+
+int rwheel = 0;
+int lwheel = 0;
+
+
+
+
+// CONFIG
+// - fPivYLimt  : The threshold at which the pivot action starts
+//                This threshold is measured in units on the Y-axis
+//                away from the X-axis (Y=0). A greater value will assign
+//                more of the joystick's range to pivot actions.
+//                Allowable range: (0..+127)
+float fPivYLimit = 800.0;
+			
+// TEMP VARIABLES
+float   nMotPremixL;    // Motor (left)  premixed output        (-128..+127)
+float   nMotPremixR;    // Motor (right) premixed output        (-128..+127)
+float     nPivSpeed;      // Pivot Speed                          (-128..+127)
+float   fPivScale;      // Balance scale b/w drive and pivot    (   0..1   )
+
+
 void steerSetup()
 {
 	// Set pins as outputs
@@ -33,28 +68,57 @@ void steerSetup()
 	pinMode(motorPin2, OUTPUT);
 	pinMode(motorPin3, OUTPUT);
 	pinMode(motorPin4, OUTPUT);
-	delay(1000); // dice el manual sobre usar analog como input.
 	
 }
 
 void motors(int m1, int m2)
 {
-	lwheel = m1; // (-yv + xv);
-	rwheel = m2; // (-yv - xv);
+	lwheel = m1; 
+	rwheel = m2; 
 }
 
 
+void drive(float yv, float xv){
 
-// ----------------------------------------
+yv = -yv;
+xv = -xv;
+	// Calculate Drive Turn output due to Joystick X input
+if (yv >= 0) {
+  // Forward
+  nMotPremixL = (xv >= 0) ? 1000.0 : (1000.0 + xv);
+  nMotPremixR = (xv >= 0) ? (1000.0 - xv) : 1000.0;
+} else {
+  // Reverse
+  nMotPremixL = (xv >= 0) ? (1000.0 - xv) : 1000.0;
+  nMotPremixR = (xv >= 0) ? 1000.0 : (1000.0 + xv);
+}
+
+// Scale Drive output due to Joystick Y input (throttle)
+nMotPremixL = nMotPremixL * yv / 1000.0;
+nMotPremixR = nMotPremixR * yv / 1000.0;
+
+// Now calculate pivot amount
+// - Strength of pivot (nPivSpeed) based on Joystick X input
+// - Blending of pivot vs drive (fPivScale) based on Joystick Y input
+nPivSpeed = xv;
+fPivScale = (abs(xv) > fPivYLimit) ? 0.0 : (1.0 - abs(yv) / fPivYLimit);
+
+// Calculate final mix of Drive and Pivot
+nMotMixL = (1.0-fPivScale) * nMotPremixL + fPivScale*( nPivSpeed);
+nMotMixR = (1.0-fPivScale) * nMotPremixR + fPivScale*(-nPivSpeed);
+
+motors(nMotPremixL, nMotPremixR);
+
+}
 
 
 void run()
 {
-	m1 = map(lwheel, -1000, 1000, 0, 255);
-	m2 = map(lwheel, -1000, 1000, 255, 0);
+	m1 = map(lwheel, -1000, 1000, 255, 0);
+	m2 = map(lwheel, -1000, 1000, 0, 255);
 	
-	m3 = map(rwheel, -1000, 1000, 255, 0);
-	m4 = map(rwheel, -1000, 1000, 0, 255);
+	m3 = map(rwheel, -1000, 1000, 0, 255);
+	m4 = map(rwheel, -1000, 1000, 255, 0);
 	
 	analogWrite(motorPin1, m1);
 	analogWrite(motorPin2, m2);
@@ -73,6 +137,10 @@ void testSequence3(){
 	motors(-1000, -1000);
 	run();
 	delay(1000);
+
+	motors(0,0);
+	run();
+
 
 	return;
 
@@ -123,9 +191,7 @@ void testSequence3(){
 	run();
 	delay(2000);
 
-	motors(0,0);
-	run();
-
+	
 
 }
 
@@ -133,34 +199,120 @@ void testSequence3(){
 
 void testSequence()
 {
-	// Motor Control - Motor A: motorPin1,motorpin2 & Motor B: motorpin3,motorpin4
-	// This code  will turn Motor A clockwise for 2 sec.
-	analogWrite(motorPin1, 180);
-	analogWrite(motorPin2, 0);
-	analogWrite(motorPin3, 180);
-	analogWrite(motorPin4, 0);
-	delay(5000);
-	// This code will turn Motor A counter-clockwise for 2 sec.
-	analogWrite(motorPin1, 0);
-	analogWrite(motorPin2, 180);
-	analogWrite(motorPin3, 0);
-	analogWrite(motorPin4, 180);
-	delay(5000);
-	// This code will turn Motor B clockwise for 2 sec.
-	analogWrite(motorPin1, 0);
-	analogWrite(motorPin2, 180);
-	analogWrite(motorPin3, 180);
-	analogWrite(motorPin4, 0);
+	drive(750, 0);
+	run();
 	delay(1000);
-	// This code will turn Motor B counter-clockwise for 2 sec.
-	analogWrite(motorPin1, 180);
-	analogWrite(motorPin2, 0);
-	analogWrite(motorPin3, 0);
-	analogWrite(motorPin4, 180);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+
+	drive(750, 1000);
+	run();
 	delay(1000);
-	// And this code will stop motors
-	analogWrite(motorPin1, 0);
-	analogWrite(motorPin2, 0);
-	analogWrite(motorPin3, 0);
-	analogWrite(motorPin4, 0);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+	drive(750, -1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+	drive(-750, 1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+	drive(-750, -1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+	return;
+
+	drive(-400, 0);
+	run();
+	delay(1000);
+
+	drive(-750, 0);
+	run();
+	delay(1000);
+
+	drive(-1000, 0);
+	run();
+	delay(1000);
+
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+
+	drive(1000, 1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+	
+	drive(-1000, 1000);
+	run();
+	delay(1000);
+
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+
+	drive(1000, -1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+	drive(-1000, -1000);
+	run();
+	delay(1000);
+
+	drive(0, 0);
+	run();
+	delay(500);
+
+
+
+
+	drive(0, 0);
+	run();
+	delay(1000);
+
+
+
+
+
+
 }

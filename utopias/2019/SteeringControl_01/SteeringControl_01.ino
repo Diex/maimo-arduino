@@ -18,20 +18,47 @@ void setup()
   Serial.begin(115200);
   Serial.println("Booting");
   lcd.init(); // initialize the lcd
-  // Print a message to the LCD.
+  // lcd.noBacklight();
   lcd.backlight();
+
   lineFollowerSetup();
   steerSetup();
-  testSequence3();
+  // testSequence3();
+  // testSequence();
+
 }
+
+byte prevStatus = 0;
+
+
+int max = 500;
+int med = 400;
+int min = 300;
+
+int delayed = 0;
+int lastTime = 0;
+
 
 void loop()
 {
   readSensors();
-  lcd.setCursor(0, 0);
-  lcd.print(String(status, BIN));
   updateSensors();
+
   robotWalk();
+
+  if (status == prevStatus) return;
+  prevStatus = status;
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("");
+  lcd.print(String(status, BIN));
+
+  lcd.setCursor(0, 1);
+  lcd.print("");
+  // lcd.print(avg);
+
+
 }
 
 void robotWalk()
@@ -39,39 +66,85 @@ void robotWalk()
   walkTheLine(status);
 }
 
-void walkTheLine(byte status)
-{
-  byte result = ~status & B00001110;
+boolean pathFinding = false;
 
-  lcd.setCursor(0, 1);
-  lcd.print(String(result, BIN));
-  
-  switch (result)
-  {
-    case B00001110:     // OUT
-        motors(500,500);        
-        run();
-      break;
-    case B00000110:     // left        
-        motors(-500,500);
-        run();
-      break;
-    case B00000010:
-        
-        motors(-100,100);
-        run();
-      break;
-    case B00001000:
-        motors(100,-100);
-        run();
-      break;
-    case B00001100:
-        motors(500,-500);
-        run();
-      break;
-    case B00000000:
-        motors(0,0);        
-        run();
-      break;
+void walkTheLine(byte status) {
+
+  if(pathFinding){
+    if(status != B00000000 && status != B00011111){
+      pathFinding = false;
+    }
+    return;
   }
+
+
+  switch (status) {
+  case B00010000: // -1
+    drive(med, 500);
+    run();
+    break;
+
+  case B00011000: // -10
+    drive(med, 600);
+    run();
+    break;
+
+  case B00011100: // -100
+    drive(med, 800);
+    run();
+    break;
+
+  case B00011110: // -1000
+    drive(med, 1000);
+    run();
+    break;
+
+  case B00011111: // OUT
+    // drive(0, 0);
+    pathFinding = true;
+    intersection();
+    run();
+    break;
+
+  case B00001111: // 1000
+    drive(med, -1000);
+    run();
+    break;
+
+  case B00000111: // 100
+    drive(med, -800);
+    run();
+    break;
+
+  case B00000011: // 10
+    drive(med, -600);
+    run();
+    break;
+
+  case B00000001: // 1
+    drive(med, -500);
+    run();
+    break;
+
+  case B00000000: // CROSS
+    pathFinding = true;
+    intersection();
+    break;
+
+  }
+}
+
+
+float ease(float p, float c, float f) {
+  return (p * f) + (c * (1 - f));
+}
+
+void intersection() {
+  drive(0,0);
+  run();
+  delay(random(5000));
+  // intersecion
+  drive(max, (random(1000) < 500 ) ? -1000 : 1000);
+  run();
+
 }

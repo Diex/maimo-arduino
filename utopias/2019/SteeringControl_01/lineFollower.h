@@ -3,11 +3,11 @@
 // SENSORES SEGUIDOR DE LINEA 
 // los sensores estan definidos viendo al robot desde arriba
 // L1 L2 -- -- R2 R1
-const int CNY_L1 = 4;  // S1 en el sensor nuevo
-const int CNY_L2 = 5;	// S2
+const int CNY_L1 = 8;  // S1 en el sensor nuevo
+const int CNY_L2 = 7;	// S2
 const int CNY_CE = 6;  
-const int CNY_R2 = 7;
-const int CNY_R1 = 8;
+const int CNY_R2 = 5;
+const int CNY_R1 = 4;
 
 int sensors[] = {CNY_L1, CNY_L2, CNY_CE, CNY_R2, CNY_R1};
 int blackValue[sizeof(sensors)/sizeof(int)];
