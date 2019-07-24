@@ -221,7 +221,7 @@ void processMessage() {
       if(notes[note] == 'E') break;
     // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
       setNeoColor(colors[notes[note] - '0']);
-      toneESP(D8,  penta[notes[note] - '0'], dataValue);
+      toneESP(D8,  penta[notes[note] - '0'], delay);
       setNeoColor(0);
       Serial.print(notes[note] - '0');
       Serial.print(':');

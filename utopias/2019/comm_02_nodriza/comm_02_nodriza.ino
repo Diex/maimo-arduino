@@ -13,13 +13,13 @@
 const char* ssid     = "suckmykiss";  // the ssid/name of the wifi, the esp will be connected to
 const char* password = "frutigran";   // the password of that wifi
 
-const char* assid = "infante";
+const char* assid = "nodriza";
 const char* asecret = "umai";
 
 ESP8266WebServer server(80);
 
 void handleRoot() {
-  server.send(200, "text/html", "<h1>Usted se ha conectado a Robot Infante</h1>");
+  server.send(200, "text/html", "<h1>Usted se ha conectado a Robot Nodriza</h1>");
 }
 
 void handleNotFound() {
@@ -31,7 +31,7 @@ void handleButton() {
 }
 
 
-#define LED D2
+#define LED D6
 
 #define DATA_IN   2
 #define SHOW_DATA 1
@@ -54,6 +54,7 @@ boolean newmessage = false;
 
 // Neopixel Config
 #define NeoPIN D7
+#define buzzer D8
 #define NUM_LEDS 8
 int brightness = 150;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, NeoPIN, NEO_RGB + NEO_KHZ800);
@@ -143,7 +144,7 @@ void setup() {
 
 
   //   we send our IP address on the WiFi network
-  if (!MDNS.begin("infante")) {
+  if (!MDNS.begin("nodriza")) {
     Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(1000);
@@ -221,7 +222,7 @@ void processMessage() {
       if(notes[note] == 'E') break;
     // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
       setNeoColor(colors[notes[note] - '0']);
-      toneESP(D8,  penta[notes[note] - '0'], dataValue);
+      toneESP(buzzer,  penta[notes[note] - '0'], delay);
       setNeoColor(0);
       Serial.print(notes[note] - '0');
       Serial.print(':');
