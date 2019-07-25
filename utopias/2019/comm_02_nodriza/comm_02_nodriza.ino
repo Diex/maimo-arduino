@@ -11,8 +11,12 @@
 // https://github.com/tzapu/WiFiManager
 // server de control del robot infante
 
-const char* ssid     = "CCU";  // the ssid/name of the wifi, the esp will be connected to
-const char* password = "";   // the password of that wifi
+// const char* ssid     = "CCU";  // the ssid/name of the wifi, the esp will be connected to
+// const char* password = "";   // the password of that wifi
+
+const char* ssid     = "infante";  // the ssid/name of the wifi, the esp will be connected to
+const char* password = "umai12345678";   // the password of that wifi
+
 
 const char* assid = "nodriza";
 const char* asecret = "umai";
@@ -187,7 +191,8 @@ void loop() {
     break;
 
     default:
-    robotsGo();
+    // robotsGo();
+    serverTest();
     break;
   }
 }
@@ -205,13 +210,52 @@ void robotsGo(){
   int httpCode = http.POST(postData);   //Send the request
   String payload = http.getString();    //Get the response payload
  
+ Serial.print("httpCode");
   Serial.println(httpCode);   //Print HTTP return code
+  Serial.print("payload");
   Serial.println(payload);    //Print request response payload
  
   http.end();  //Close connection
 
   status = ROBOT_GO;
 }
+
+
+// const char* host = "http://infante.local/message/";
+
+void serverTest(){
+
+  String data = "robotgo=1";
+  String url = "http://152.152.152.152/message";
+  HTTPClient http;
+  // http.setReuse(true);
+  http.begin(url);
+  http.addHeader("Content-Type", "text/plain");
+  
+  // http.addHeader("Host", "www.shippingmanager.dk");
+  // http.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0");
+  // http.addHeader("Accept-Language", " en-US,en;q=0.5");
+  // http.addHeader("Accept-Encoding", " gzip, deflate, br");
+  // http.addHeader("X-Requested-With", " XMLHttpRequest");
+  // http.addHeader("Referer", " https://www.shippingmanager.dk/sh/?fb_source=shippingmanager.dk");
+  // http.addHeader("Connection", "keep-alive");
+  // http.addHeader("Pragma", " no-cache");
+  // http.addHeader("Cache-Control", " no-cache");
+
+  int result = http.POST(data);
+  String payload = http.getString();    //Get the response payload
+
+  // http.writeToStream(&Serial);
+  http.end();
+  
+  Serial.println(result);
+  Serial.println(payload);
+
+
+  delay(1000);
+}
+
+
 
 
 void setNeoColor(int value){
