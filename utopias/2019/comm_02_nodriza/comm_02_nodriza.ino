@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266HTTPClient.h>
 
 
 // Neopixel
@@ -10,8 +11,8 @@
 // https://github.com/tzapu/WiFiManager
 // server de control del robot infante
 
-const char* ssid     = "suckmykiss";  // the ssid/name of the wifi, the esp will be connected to
-const char* password = "frutigran";   // the password of that wifi
+const char* ssid     = "CCU";  // the ssid/name of the wifi, the esp will be connected to
+const char* password = "";   // the password of that wifi
 
 const char* assid = "nodriza";
 const char* asecret = "umai";
@@ -33,9 +34,10 @@ void handleButton() {
 
 #define LED D6
 
-#define DATA_IN   2
-#define SHOW_DATA 1
 #define ROBOT_GO  0
+#define ROBOT_NOGO  1
+#define DATA_IN   2
+#define SHOW_DATA 3
 
 
 const char datain[] = "datain";
@@ -51,6 +53,7 @@ int dataValue = 0;
 
 boolean newmessage = false;
 
+int status = -1;
 
 // Neopixel Config
 #define NeoPIN D7
@@ -176,6 +179,38 @@ void loop() {
 
   processMessage(); // tone(3, random(1000), 100);
 
+  switch(status){
+    case ROBOT_GO:
+    break;
+
+    case ROBOT_NOGO:
+    break;
+
+    default:
+    robotsGo();
+    break;
+  }
+}
+
+void robotsGo(){
+
+  HTTPClient http;    //Declare object of class HTTPClient
+ 
+  //Post Data
+  String postData = "robotgo=1";
+  
+  http.begin("http://infante.local/message/");              //Specify request destination
+  http.addHeader("Content-Type", "text/plain");    //Specify content-type header
+ 
+  int httpCode = http.POST(postData);   //Send the request
+  String payload = http.getString();    //Get the response payload
+ 
+  Serial.println(httpCode);   //Print HTTP return code
+  Serial.println(payload);    //Print request response payload
+ 
+  http.end();  //Close connection
+
+  status = ROBOT_GO;
 }
 
 

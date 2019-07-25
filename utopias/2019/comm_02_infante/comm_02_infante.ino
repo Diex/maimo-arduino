@@ -10,11 +10,11 @@
 // https://github.com/tzapu/WiFiManager
 // server de control del robot infante
 
-const char* ssid     = "suckmykiss";  // the ssid/name of the wifi, the esp will be connected to
-const char* password = "frutigran";   // the password of that wifi
+const char* ssid     = "CCU";  // the ssid/name of the wifi, the esp will be connected to
+const char* password = "";   // the password of that wifi
 
 const char* assid = "infante";
-const char* asecret = "umai";
+const char* asecret = "umai12345678";
 
 ESP8266WebServer server(80);
 
@@ -120,7 +120,7 @@ void setup() {
 
   //access point part
   Serial.println("Creating Accesspoint");
-  WiFi.softAP(assid, asecret, 7, 0, 5);
+  WiFi.softAP(assid, asecret, 3, 0, 5); // channel hidden conns
 
   Serial.print("IP address:\t");
   Serial.println(WiFi.softAPIP());
