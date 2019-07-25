@@ -75,22 +75,28 @@ void handleMessage() {
     server.argName(i).toCharArray(arg, 256);
     server.arg(i).toCharArray(val, 256);
 
+    server.send(200, "text/plain", server.arg(i));
+
     if (strncmp(arg, datain, strlen(datain)) == 0) {
       messageId = DATA_IN;
       server.arg(i).toCharArray(notes, 256);
+      
+
 
     } else if (strncmp(arg, robotgo, strlen(robotgo)) == 0) {
       messageId = ROBOT_GO;
       dataValue = (strncmp(val, "0", 1) == 0) ? 0 : 1;
+      
     } else if (strncmp(arg, showdata, strlen(showdata)) == 0) {
       messageId = SHOW_DATA;
       dataValue = atoi(val);
+
     }
   }
 
 
 
-  server.send(200, "text/plain", "message received");
+  
   // server.sendHeader("Location","/message");        // Add a header to respond with a new location for the browser to go to the home page again
   // server.send(303);                         // Send it back to the browser with an HTTP status 303 (See Other) to redirect
 }

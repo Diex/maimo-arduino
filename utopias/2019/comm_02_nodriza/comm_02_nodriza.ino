@@ -191,8 +191,7 @@ void loop() {
     break;
 
     default:
-    // robotsGo();
-    serverTest();
+    seq1();
     break;
   }
 }
@@ -210,7 +209,7 @@ void robotsGo(){
   int httpCode = http.POST(postData);   //Send the request
   String payload = http.getString();    //Get the response payload
  
- Serial.print("httpCode");
+  Serial.print("httpCode");
   Serial.println(httpCode);   //Print HTTP return code
   Serial.print("payload");
   Serial.println(payload);    //Print request response payload
@@ -221,16 +220,75 @@ void robotsGo(){
 }
 
 
-// const char* host = "http://infante.local/message/";
+char  url[] = "http://152.152.152.152/message";
+char  msg1[] = "robotgo=1";
+char  msg2[] = "robotgo=0";
+char msg3[] = "datain=123456789E";
+char msg4[] = "showdata=200";
 
-void serverTest(){
 
-  String data = "robotgo=1";
-  String url = "http://152.152.152.152/message";
+const char sc1[]  = "datain=6257449155199819787662574491551998197876E";
+const char sc2[]  = "datain=4173637875621766625744458717390361014939E";
+const char sc3[]  = "datain=5210842659386807094936181275452224845957E";
+const char sc4[]  = "datain=8516803539810725349444433501582345497653E";
+const char sc5[]  = "datain=5882276482115427618684449051971991698523E";
+const char sc6[]  = "datain=9501638183453242123139684146031312447573E";
+const char sc7[]  = "datain=3641311234516255331987598728711718645270E";
+const char sc8[]  = "datain=3176014245643737624698990601280638522241E";
+const char sc9[]  = "datain=3314973469488713461701668306298189586129E";
+const char sc10[] = "datain=3351317039510238005586228404088563138889E";
+const char sc11[] = "datain=5523235045035010387016870506262734898837E";
+const char sc12[] = "datain=4003905095472182184279541161737282561078E";
+const char sc13[] = "datain=1352624935368459570520503083631475093514E";
+const char sc14[] = "datain=9364305879801433586127158532772903213347E";
+const char sc15[] = "datain=1766299240995411516682481356996677082050E";
+const char sc16[] = "datain=0573543063746524806717967731846668610483E";
+const char sc17[] = "datain=7971537163083545222576525105039636260672E";
+const char sc18[] = "datain=4238534527698157705136682930004353970807E";
+const char sc19[] = "datain=3382295116561489223903613525948815551550E";
+const char sc20[] = "datain=1149986358045665358183368640854224671641E";
+
+const char * scores[] = {sc1,sc2,sc3,sc4,sc5,sc6,sc7,sc8,sc9,sc10,sc11,sc12,sc13,sc14,sc15,sc16,sc17,sc18,sc19,sc20};
+
+void seq1(){
+
+  digitalWrite(LED, 0); // me detengo
+  postMessage(msg2);  // detengo al infante...
+  Serial.println("both stop");
+  
+  int cual = random(sizeof(scores)/sizeof(char));
+  char data[128];
+   
+  strcat(data,scores[cual]);
+  
+  postMessage(data);  // send data
+
+  char * pch = strtok(data, "=");
+  Serial.print("data: ");
+  Serial.println(pch);
+
+
+  // pch.toCharArray(notes, 256);
+  strcpy(notes, pch);
+  showData(200); // muestro la data
+
+  
+  postMessage(msg4);  // le digo a infante que muestre la data...
+
+
+  delay(5000);
+
+  digitalWrite(LED, 1);
+  postMessage(msg1);
+  delay(5000);
+}
+
+
+boolean postMessage(char data[]){
+
   HTTPClient http;
-  // http.setReuse(true);
   http.begin(url);
-  http.addHeader("Content-Type", "text/plain");
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   
   // http.addHeader("Host", "www.shippingmanager.dk");
   // http.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0");
@@ -242,17 +300,21 @@ void serverTest(){
   // http.addHeader("Pragma", " no-cache");
   // http.addHeader("Cache-Control", " no-cache");
 
+  Serial.print(">>> : "); Serial.println(url);
+  Serial.print(">>> : "); Serial.println(data);
+
   int result = http.POST(data);
   String payload = http.getString();    //Get the response payload
 
   // http.writeToStream(&Serial);
   http.end();
   
-  Serial.println(result);
-  Serial.println(payload);
-
+  Serial.print("<<< : "); Serial.println(result);
+  Serial.print("<<< : "); Serial.println(payload);
 
   delay(1000);
+  return (result == 200) ? true : false ;
+
 }
 
 
@@ -279,6 +341,25 @@ void setNeoColor(int value){
 }
 
 
+void showData(int dataValue){
+
+  int delay = dataValue > 200 ? 200 : dataValue;
+   long now = millis();
+
+    for(int note = 0; note < strlen(notes); note++) {  // voy a terminar cuando encuentro el caracter 'E'      
+      if(notes[note] == 'E') break;
+    // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
+      setNeoColor(colors[notes[note] - '0']);
+      toneESP(buzzer,  penta[notes[note] - '0'], delay);
+      setNeoColor(0);
+      Serial.print(notes[note] - '0');
+      Serial.print(':');
+      Serial.print(penta[notes[note] - '0']);
+      Serial.print(':');
+    }
+
+}
+
 void processMessage() {
   if (!newmessage) return;
 
@@ -294,21 +375,7 @@ void processMessage() {
     break;
 
   case SHOW_DATA:
-    delay = dataValue > 200 ? 200 : dataValue;
-    now = millis();
-
-    for(int note = 0; note < strlen(notes); note++) {  // voy a terminar cuando encuentro el caracter 'E'      
-      if(notes[note] == 'E') break;
-    // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
-      setNeoColor(colors[notes[note] - '0']);
-      toneESP(buzzer,  penta[notes[note] - '0'], delay);
-      setNeoColor(0);
-      Serial.print(notes[note] - '0');
-      Serial.print(':');
-      Serial.print(penta[notes[note] - '0']);
-      Serial.print(':');
-    }
-
+    showData(dataValue);
   // blabla...
     break;
 
