@@ -1,8 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-
-
 // Neopixel
 #include <Adafruit_NeoPixel.h>
 
@@ -10,12 +8,15 @@
 // https://github.com/tzapu/WiFiManager
 // server de control del robot infante
 
-const char* ssid     = "RENZO";  // the ssid/name of the wifi, the esp will be connected to
-const char* password = "renzohelados2019";   // the password of that wifi
+// const char* ssid     = "RENZO";  // the ssid/name of the wifi, the esp will be connected to
+// const char* password = "renzohelados2019";   // the password of that wifi
+
+// el robot infante se comporta como AP para la nodriza.
 
 const char* assid = "infante";
 const char* asecret = "umai12345678";
 
+// tiene una ip fija (router)
 IPAddress    apIP(152, 152, 152, 152); 
 ESP8266WebServer server(80);
 
@@ -24,25 +25,23 @@ void handleRoot() {
 }
 
 void handleNotFound() {
-  server.send(404, "text/plain", "404: :( "); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
-}
-
-void handleButton() {
-  server.send(200, "text/html", "<form action=\"/hikido\" method=\"POST\"><input type=\"submit\" value=\"Toggle LED\"></form>");
+  server.send(404, "text/plain", "404: :( "); 
 }
 
 
-#define LED D2
-
-#define DATA_IN   2
-#define SHOW_DATA 1
-#define ROBOT_GO  0
+#define LED D2  // es el pin que maneja el driving on - off
 
 
-const char datain[] = "datain";
+// que estoy haciendo?
+#define ROBOT_GO    0
+#define ROBOT_NOGO  1
+#define SHOW_DATA   2
+#define DATA_IN     3
+
+// http messages
+const char datain[]   = "datain";
 const char showdata[] = "showdata";
-const char robotgo[] = "robotgo";
-
+const char robotgo[]  = "robotgo";
 
 char *message;
 int messageId = -1;
@@ -72,7 +71,6 @@ void handleMessage() {
     Serial.print(server.argName(i));
     Serial.print(": ");
     Serial.println(server.arg(i));
-
 
     server.argName(i).toCharArray(arg, 256);
     server.arg(i).toCharArray(val, 256);
@@ -157,7 +155,6 @@ void setup() {
   Serial.println("mDNS responder started");
 
   server.on("/", handleRoot);
-  server.on("/button", handleButton);
   server.on("/message", handleMessage);
 
   server.onNotFound(handleNotFound);
@@ -170,6 +167,8 @@ void setup() {
   delay(50);
   Serial.println("NeoPixel started");
 
+  // enciendo el robot y sale andando...
+  digitalWrite(LED, 1);
 
 }
 
@@ -177,7 +176,8 @@ void loop() {
   MDNS.update();
   server.handleClient();
 
-  processMessage(); // tone(3, random(1000), 100);
+  processMessage(); 
+
 
 }
 
@@ -213,6 +213,7 @@ void processMessage() {
   long now = 0;
 
   switch (messageId) {
+
   case ROBOT_GO:
     digitalWrite(LED, dataValue);
     break;
@@ -223,10 +224,10 @@ void processMessage() {
 
     for(int note = 0; note < strlen(notes); note++) {  // voy a terminar cuando encuentro el caracter 'E'      
       if(notes[note] == 'E') break;
-    // void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
       setNeoColor(colors[notes[note] - '0']);
       toneESP(D8,  penta[notes[note] - '0'], delay);
       setNeoColor(0);
+    
       Serial.print(notes[note] - '0');
       Serial.print(':');
       Serial.print(penta[notes[note] - '0']);
